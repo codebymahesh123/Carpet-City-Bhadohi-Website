@@ -6,8 +6,8 @@ from supabase import create_client, Client
 
 # --- SUPABASE CONNECTION ---
 # YAHAN APNI SUPABASE DETAILS DALEIN (Project Settings -> API se copy karein)
-SUPABASE_URL = "YOUR_SUPABASE_PROJECT_URL"
-SUPABASE_KEY = "YOUR_SUPABASE_ANON_KEY"
+SUPABASE_URL = st.secrets["SUPABASE_URL"]
+SUPABASE_KEY = st.secrets["SUPABASE_KEY"]
 
 @st.cache_resource
 def init_supabase():
