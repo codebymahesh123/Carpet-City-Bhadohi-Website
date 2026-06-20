@@ -33,7 +33,7 @@ hide_streamlit_style = """
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
-# 2. Always Light Mode & Flipkart Style CSS
+# 2. Always Light Mode
 st.markdown("""
     <style>
     /* Background and General Text */
@@ -96,8 +96,12 @@ st.markdown("""
 if 'page' not in st.session_state:
     st.session_state.page = "🛍️ Product Catalog"
 
+if 'admin_logged_in' not in st.session_state:
+    st.session_state.admin_logged_in = False
+
 if 'cart' not in st.session_state:
     st.session_state.cart = {}
+
 
 # DATABASE SE PRODUCTS FETCH KARNA
 try:
@@ -108,18 +112,24 @@ except Exception as e:
     st.session_state.products = []
 
 # --- TOP NAVIGATION BAR (Flipkart Style) ---
-nav_col1, nav_col2, nav_col3 = st.columns([3, 1, 1])
+# Yahan humne 4 columns banaye hain: Title(3), Admin(1), Home(1), Cart(1)
+nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([3, 1, 1, 1])
 
 with nav_col1:
     st.markdown("<div class='brand-title'>👑 SM Carpet City</div>", unsafe_allow_html=True)
     st.markdown("<div class='brand-subtitle'>Explore Premium Bhadohi Rugs</div>", unsafe_allow_html=True)
 
 with nav_col2:
+    if st.button("⚙️ Admin", use_container_width=True):
+        st.session_state.page = "⚙️ Admin Panel"
+        st.rerun()
+
+with nav_col3:
     if st.button("🏠 Home", use_container_width=True):
         st.session_state.page = "🛍️ Product Catalog"
         st.rerun()
 
-with nav_col3:
+with nav_col4:
     cart_items = sum(item['quantity'] for item in st.session_state.cart.values())
     if st.button(f"🛒 Cart ({cart_items})", use_container_width=True, type="primary"):
         st.session_state.page = "🛒 Shopping Cart & Checkout"
@@ -170,7 +180,7 @@ st.markdown(f"""
             </button>
         </a>
     </div>
-""", unsafe_allow_html=True) 
+""", unsafe_allow_html=True)
 
 
 
@@ -238,7 +248,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
         total_amount = 0
         
         with col_cart:
-            st.markdown("### 🛒 My Cart")
+            st.markdown("# 🛒 My Cart")
             for p_id, item in list(st.session_state.cart.items()):
                 c1, c2, c3, c4 = st.columns([3, 1, 1, 1])
                 c1.write(f"**{item['name']}**")
@@ -335,33 +345,113 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                     except Exception as e:
                         st.error(f"Failed to save order in Database: {e}")
 
-
-# --- PAGE 3: ADMIN PANEL ---
+# --- PAGE 3: ADMIN PANEL (SECURED & CYBER FUTURISTIC) ---
 elif st.session_state.page == "⚙️ Admin Panel":
-    st.subheader("Admin Dashboard - Add New Stock")
     
-    with st.form("add_product_form"):
-        new_name = st.text_input("Dari / Rug Name")
-        new_price = st.number_input("Price (₹)", min_value=0, value=0)
-        new_desc = st.text_area("Product Description")
-        new_img_path = st.text_input("Image File Path or URL (e.g. from Supabase Storage)", value="")
+    # --- LOGIN SCREEN ---
+    if not st.session_state.admin_logged_in:
+        # Cyber Futuristic UI CSS (Only for Login Page)
+        st.markdown("""
+            <style>
+            .stApp {
+                background-color: #0d0d0d !important;
+                background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000000 100%);
+                color: #00ffcc !important;
+            }
+            .cyber-box {
+                background: rgba(10, 25, 47, 0.8);
+                border: 2px solid #00ffcc;
+                box-shadow: 0 0 15px #00ffcc, inset 0 0 10px #00ffcc;
+                border-radius: 10px;
+                padding: 40px;
+                max-width: 450px;
+                margin: auto;
+                text-align: center;
+                margin-top: 50px;
+            }
+            .cyber-title {
+                color: #ff007f;
+                font-family: 'Courier New', Courier, monospace;
+                font-size: 30px;
+                font-weight: bold;
+                text-shadow: 0 0 10px #ff007f;
+                margin-bottom: 20px;
+            }
+            /* Hide the default Streamlit Top Bar for immersive effect */
+            [data-testid="stHeader"] { background-color: transparent !important; }
+            </style>
+        """, unsafe_allow_html=True)
+
+        st.markdown("<div class='cyber-box'>", unsafe_allow_html=True)
+        st.markdown("<div class='cyber-title'>[ SYSTEM_ACCESS ]</div>", unsafe_allow_html=True)
         
-        submit_new_prod = st.form_submit_button("Add Product to Catalog", type="primary")
+        # Streamlit Native Inputs styled by the container
+        admin_user = st.text_input("USER ID", placeholder="Enter Username")
+        admin_pass = st.text_input("PASSWORD", type="password", placeholder="Enter Password")
         
-        if submit_new_prod:
-            if new_name == "": 
-                st.error("Enter the product name!")
-            else:
+        # Login Button
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("INITIALIZE LOGIN ⚡", use_container_width=True, type="primary"):
+            if admin_user and admin_pass:
+                # Check from Supabase 'admins' table
                 try:
-                    product_data = {
-                        "name": new_name,
-                        "price": int(new_price),
-                        "description": new_desc,
-                        "image_path": new_img_path
-                    }
-                    supabase.table("products").insert(product_data).execute()
+                    response = supabase.table("admins").select("*").eq("username", admin_user).eq("password", admin_pass).execute()
                     
-                    st.success(f"Naya Product '{new_name}' Database me add ho gaya!")
-                    st.rerun()
+                    if len(response.data) > 0:
+                        st.session_state.admin_logged_in = True
+                        st.success("ACCESS GRANTED. Welcome to the mainframe.")
+                        st.rerun()
+                    else:
+                        st.error("ACCESS DENIED: Invalid Credentials!")
                 except Exception as e:
-                    st.error(f"Error adding product to Database: {e}")
+                    st.error(f"SYSTEM ERROR: Could not connect to Auth Database. {e}")
+            else:
+                st.warning("Please provide complete credentials.")
+                
+        st.markdown("</div>", unsafe_allow_html=True)
+
+    # --- ADMIN DASHBOARD (VISIBLE ONLY AFTER LOGIN) ---
+    else:
+        # Reset back to light theme for the dashboard to match your app
+        st.markdown("""
+            <style>
+            .stApp { background-color: #f1f3f6 !important; color: #212121 !important; }
+            </style>
+        """, unsafe_allow_html=True)
+
+        col1, col2 = st.columns([4, 1])
+        with col1:
+            st.subheader("⚙️ Admin Dashboard - Manage Catalog")
+        with col2:
+            if st.button("Logout 🔴", use_container_width=True):
+                st.session_state.admin_logged_in = False
+                st.rerun()
+
+        st.markdown("---")
+        
+        with st.form("add_product_form"):
+            new_name = st.text_input("Dari / Rug Name")
+            new_price = st.number_input("Price (₹)", min_value=0, value=0)
+            new_desc = st.text_area("Product Description")
+            new_img_path = st.text_input("Image File Path or URL (e.g. from Supabase Storage)", value="")
+            
+            submit_new_prod = st.form_submit_button("Add Product to Catalog", type="primary")
+            
+            if submit_new_prod:
+                if new_name == "": 
+                    st.error("Enter the product name!")
+                else:
+                    try:
+                        product_data = {
+                            "name": new_name,
+                            "price": int(new_price),
+                            "description": new_desc,
+                            "image_path": new_img_path
+                        }
+                        supabase.table("products").insert(product_data).execute()
+                        
+                        st.success(f"Naya Product '{new_name}' Database me add ho gaya!")
+                        # Clear form by rerunning
+                        st.rerun()
+                    except Exception as e:
+                        st.error(f"Error adding product to Database: {e}")
