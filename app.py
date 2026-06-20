@@ -24,6 +24,14 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="collapsed" # Sidebar by default band rahega clean look ke liye
 )
+hide_streamlit_style = """
+    <style>
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+    </style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
 
 # 2. Always Light Mode & Flipkart Style CSS
 st.markdown("""
