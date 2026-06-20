@@ -1,4 +1,22 @@
 import streamlit as st
+import streamlit as st
+
+# --- HIDE STREAMLIT BRANDING ---
+hide_streamlit_style = """
+<style>
+/* Default footer aur top-right menu ko hide karne ke liye */
+#MainMenu {visibility: hidden;}
+footer {visibility: hidden;}
+
+/* 'Hosted with Streamlit' floating badge ko hide karne ke liye */
+[class^="viewerBadge_container"] {display: none !important;}
+[class^="viewerBadge_link"] {display: none !important;}
+[class^="embeddedAppMetaInfoBar_container"] {display: none !important;}
+</style>
+"""
+st.markdown(hide_streamlit_style, unsafe_allow_html=True)
+
+# ... (iske niche aapka bacha hua website ka code aayega) ...
 import qrcode
 import io
 from urllib.parse import quote
