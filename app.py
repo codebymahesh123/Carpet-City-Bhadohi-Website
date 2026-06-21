@@ -256,8 +256,50 @@ if st.session_state.page == "🛍️ Product Catalog":
 # --- PAGE 2: CART & CHECKOUT ---
 elif st.session_state.page == "🛒 Shopping Cart & Checkout":
     
-    if not st.session_state.cart:
+    # 1. Agar order place ho chuka hai, to direct QR code dikhao
+    if 'order_ready' in st.session_state:
+        st.success(f"✅ Order Confirmed for {st.session_state.order_ready['name']}! Delivery details saved in Database.")
+        
+        YOUR_UPI_ID = "maheshsing221314-3@okaxis" 
+        YOUR_NAME = "MAHESH MAURYA"
+        
+        tn_note = quote(f"Order for {st.session_state.order_ready['name']}")
+        pn_name = quote(YOUR_NAME)
+        upi_url = f"upi://pay?pa={YOUR_UPI_ID}&pn={pn_name}&am={st.session_state.order_ready['amount']}&cu=INR&tn={tn_note}"
+        
+        st.markdown("### 📱 Complete Your Payment")
+        st.info(f"Amount to Pay: ₹{st.session_state.order_ready['amount']}")
+        
+        col_qr, col_btn = st.columns([1, 2])
+        with col_qr:
+            qr = qrcode.QRCode(version=1, box_size=10, border=4)
+            qr.add_data(upi_url)
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            byte_im = buf.getvalue()
+            
+            st.image(byte_im, width=200, caption="Scan via PhonePe, GPay, Paytm")
+        
+        with col_btn:
+            st.markdown("<br>", unsafe_allow_html=True)
+            st.markdown(f'<a href="{upi_url}" target="_blank"><button style="background-color:#2874f0; color:white; padding:12px 24px; border:none; border-radius:5px; font-size:16px; cursor:pointer; font-weight:bold; width:100%;">Pay via UPI App (Click Here) 🚀</button></a>', unsafe_allow_html=True)
+            st.write("Click above if paying from mobile.")
+            
+            st.markdown("<br><br>", unsafe_allow_html=True)
+            # Wapas Home page par jane ka button
+            if st.button("Shop More 🛍️", use_container_width=True):
+                del st.session_state.order_ready
+                st.session_state.page = "🛍️ Product Catalog"
+                st.rerun()
+
+    # 2. Agar cart khali hai (aur order place nahi hua hai)
+    elif not st.session_state.cart:
         st.info("Your Cart is Empty. Please add items from the Home page.")
+
+    # 3. Cart me items hain, to Checkout Form dikhao
     else:
         col_cart, col_summary = st.columns([2, 1])
         
@@ -289,6 +331,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                 address = st.text_area("Full Delivery Address *")
                 pincode = st.text_input("PIN Code *", max_chars=6)
                 
+                # Button click hote hi DB me save hoga
                 submit_order = st.form_submit_button("Proceed to Pay", type="primary", use_container_width=True)
                 
                 if submit_order:
@@ -299,67 +342,37 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                     elif not pincode.isdigit() or len(pincode) != 6:
                         st.error("Please enter a valid 6-digit PIN Code")
                     else:
-                        st.session_state.order_ready = {
-                            "name": customer_name,
-                            "amount": total_amount,
+                        # Database ke liye data tayyar karna
+                        order_data = {
+                            "customer_name": customer_name,
                             "phone": phone,
                             "address": address,
+                            "home_address": "N/A", 
                             "pincode": pincode,
-                        }
-
-        # --- DYNAMIC UPI QR CODE & DATABASE SAVE ---
-        if 'order_ready' in st.session_state:
-            st.markdown("---")
-            st.success(f"Delivery details saved for {st.session_state.order_ready['name']}. Please complete payment.")
-            
-            YOUR_UPI_ID = "maheshsing221314-3@okaxis" 
-            YOUR_NAME = "MAHESH MAURYA"
-            
-            tn_note = quote(f"Order for {st.session_state.order_ready['name']}")
-            pn_name = quote(YOUR_NAME)
-            upi_url = f"upi://pay?pa={YOUR_UPI_ID}&pn={pn_name}&am={st.session_state.order_ready['amount']}&cu=INR&tn={tn_note}"
-            
-            st.markdown("### 📱 Payment Options")
-            st.info(f"Amount to Pay: ₹{st.session_state.order_ready['amount']}")
-            
-            col_qr, col_btn = st.columns([1, 2])
-            with col_qr:
-                qr = qrcode.QRCode(version=1, box_size=10, border=4)
-                qr.add_data(upi_url)
-                qr.make(fit=True)
-                img = qr.make_image(fill_color="black", back_color="white")
-                
-                buf = io.BytesIO()
-                img.save(buf, format="PNG")
-                byte_im = buf.getvalue()
-                
-                st.image(byte_im, width=200, caption="Scan via PhonePe, GPay, Paytm")
-            
-            with col_btn:
-                st.markdown("<br>", unsafe_allow_html=True)
-                st.markdown(f'<a href="{upi_url}" target="_blank"><button style="background-color:#2874f0; color:white; padding:12px 24px; border:none; border-radius:5px; font-size:16px; cursor:pointer; font-weight:bold; width:100%;">Pay via UPI App (Click Here) 🚀</button></a>', unsafe_allow_html=True)
-                st.write("Click above if paying from mobile.")
-                
-                st.markdown("<br>", unsafe_allow_html=True)
-                if st.button("Confirm Payment Completed ✅", use_container_width=True, type="primary"):
-                    try:
-                        order_data = {
-                            "customer_name": st.session_state.order_ready['name'],
-                            "phone": st.session_state.order_ready['phone'],
-                            "address": st.session_state.order_ready['address'],
-                            "home_address": "N/A", # Optional field removed for cleaner UI
-                            "pincode": st.session_state.order_ready['pincode'],
-                            "total_amount": int(st.session_state.order_ready['amount']),
+                            "total_amount": int(total_amount),
                             "payment_status": "Pending"
                         }
-                        supabase.table("orders").insert(order_data).execute()
                         
-                        st.balloons()
-                        st.success("Thank you! Your order has been placed. We will contact you soon.")
-                        st.session_state.cart = {}
-                        del st.session_state.order_ready
-                    except Exception as e:
-                        st.error(f"Failed to save order in Database: {e}")
+                        try:
+                            # 1. Order ko turant Supabase me save karna
+                            supabase.table("orders").insert(order_data).execute()
+                            
+                            # 2. QR code page dikhane ke liye data set karna
+                            st.session_state.order_ready = {
+                                "name": customer_name,
+                                "amount": total_amount,
+                                "phone": phone,
+                                "address": address,
+                                "pincode": pincode,
+                            }
+                            
+                            # 3. Cart khali karna aur balloons dikhana
+                            st.session_state.cart = {}
+                            st.balloons()
+                            st.rerun() # Page ko refresh karke QR code wali screen par le jana
+                            
+                        except Exception as e:
+                            st.error(f"Failed to save order in Database: {e}")
 
 # --- PAGE 3: ADMIN PANEL (SECURED & CYBER FUTURISTIC) ---
 elif st.session_state.page == "⚙️ Admin Panel":
