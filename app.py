@@ -312,7 +312,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
             st.markdown("---")
             st.success(f"Delivery details saved for {st.session_state.order_ready['name']}. Please complete payment.")
             
-            YOUR_UPI_ID = "maheshsing221314-4@okhdfcbank" 
+            YOUR_UPI_ID = "maheshsing221314-3@okaxis" 
             YOUR_NAME = "MAHESH MAURYA"
             
             tn_note = quote(f"Order for {st.session_state.order_ready['name']}")
