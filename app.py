@@ -426,7 +426,7 @@ elif st.session_state.page == "⚙️ Admin Panel":
                 
         st.markdown("</div>", unsafe_allow_html=True)
 
-    # --- ADMIN DASHBOARD (VISIBLE ONLY AFTER LOGIN) ---
+   # --- ADMIN DASHBOARD (VISIBLE ONLY AFTER LOGIN) ---
     else:
         # Reset back to light theme for the dashboard to match your app
         st.markdown("""
@@ -445,7 +445,8 @@ elif st.session_state.page == "⚙️ Admin Panel":
 
         st.markdown("---")
         
-        with st.form("add_product_form"):
+        # FIX 1: 'clear_on_submit=True' lagane se form submit hone ke baad apne aap khali ho jayega
+        with st.form("add_product_form", clear_on_submit=True):
             new_name = st.text_input("Dari / Rug Name")
             new_price = st.number_input("Price (₹)", min_value=0, value=0)
             new_desc = st.text_area("Product Description")
@@ -466,8 +467,12 @@ elif st.session_state.page == "⚙️ Admin Panel":
                         }
                         supabase.table("products").insert(product_data).execute()
                         
-                        st.success(f"Naya Product '{new_name}' Database me add ho gaya!")
-                        # Clear form by rerunning
-                        st.rerun()
+                        # FIX 2: Sahi tarike se success message show karna
+                        st.success("✅ Your product is added to Website!")
+                        
+                        # (Optional) Thoda aur acha dikhane ke liye balloons ka effect bhi daal sakte hain
+                        st.balloons() 
+                        
+                        # Yahan se st.rerun() hata diya gaya hai kyunki 'clear_on_submit=True' form clear kar dega
                     except Exception as e:
                         st.error(f"Error adding product to Database: {e}")
