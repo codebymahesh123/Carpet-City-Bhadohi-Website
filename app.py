@@ -358,7 +358,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                             # Balloons ki jagah ek professional secure gateway loading spinner
                             with st.spinner("🔒 Securing connection & generating your order..."):
                                 import time
-                                time.sleep(1.4) # Ek realistic premium gateway feel dene ke liye thoda pause
+                                time.sleep(2.4) # Ek realistic premium gateway feel dene ke liye thoda pause
                                 
                                 # 1. Order ko turant Supabase me save karna
                                 supabase.table("orders").insert(order_data).execute()
