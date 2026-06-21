@@ -354,22 +354,30 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                         }
                         
                         try:
-                            # 1. Order ko turant Supabase me save karna
-                            supabase.table("orders").insert(order_data).execute()
+                            # --- 🌟 NEW PREMIUM EFFECT 🌟 ---
+                            # Balloons ki jagah ek professional secure gateway loading spinner
+                            with st.spinner("🔒 Securing connection & generating your order..."):
+                                import time
+                                time.sleep(1.4) # Ek realistic premium gateway feel dene ke liye thoda pause
+                                
+                                # 1. Order ko turant Supabase me save karna
+                                supabase.table("orders").insert(order_data).execute()
+                                
+                                # 2. QR code page dikhane ke liye data set karna
+                                st.session_state.order_ready = {
+                                    "name": customer_name,
+                                    "amount": total_amount,
+                                    "phone": phone,
+                                    "address": address,
+                                    "pincode": pincode,
+                                }
+                                
+                                # 3. Cart khali karna
+                                st.session_state.cart = {}
                             
-                            # 2. QR code page dikhane ke liye data set karna
-                            st.session_state.order_ready = {
-                                "name": customer_name,
-                                "amount": total_amount,
-                                "phone": phone,
-                                "address": address,
-                                "pincode": pincode,
-                            }
-                            
-                            # 3. Cart khali karna aur balloons dikhana
-                            st.session_state.cart = {}
-                            st.balloons()
-                            st.rerun() # Page ko refresh karke QR code wali screen par le jana
+                            # Ek pyara sa modern side-toast notification (Balloons se kahi zyada professional)
+                            st.toast("📦 Order initialized successfully!", icon="🚀")
+                            st.rerun() 
                             
                         except Exception as e:
                             st.error(f"Failed to save order in Database: {e}")
