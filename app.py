@@ -1,20 +1,27 @@
 import streamlit as st
 # --- HIDE STREAMLIT BRANDING ---
+# --- HIDE STREAMLIT BRANDING & FLOATING BADGES ---
 hide_streamlit_style = """
 <style>
 /* Default footer aur top-right menu ko hide karne ke liye */
 #MainMenu {visibility: hidden;}
 footer {visibility: hidden;}
+header {visibility: hidden;}
 
 /* 'Hosted with Streamlit' floating badge ko hide karne ke liye */
-[class^="viewerBadge_container"] {display: none !important;}
-[class^="viewerBadge_link"] {display: none !important;}
-[class^="embeddedAppMetaInfoBar_container"] {display: none !important;}
+.viewerBadge_container {display: none !important;}
+.viewerBadge_link {display: none !important;}
+
+/* 'Manage App' aur profile avatar (jo red color me dikh raha hai) ko hide karne ke liye */
+div[data-testid="stAppDeployButton"] {display: none !important;}
+div[data-testid="stStatusWidget"] {display: none !important;}
+div[data-testid="stToolbar"] {display: none !important;}
+
+/* Kisi bhi embedded meta info ko hide karne ke liye */
+.embeddedAppMetaInfoBar_container {display: none !important;}
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
-
-# ... (iske niche aapka bacha hua website ka code aayega) ...
 import qrcode
 import io
 from urllib.parse import quote
