@@ -164,6 +164,7 @@ if st.sidebar.button("Admin Panel (Add Rug)", use_container_width=True):
     st.session_state.page = "⚙️ Admin Panel"
     st.rerun()
 # --- FLOATING WHATSAPP BUTTON (Bottom-Right) ---
+# --- FLOATING WHATSAPP BUTTON (UPDATED POSITION) ---
 YOUR_WHATSAPP_NUMBER = "918009076300"
 wa_link = f"https://wa.me/{YOUR_WHATSAPP_NUMBER}?text=Hello,%20I%20want%20to%20know%20more%20about%20your%20carpets!"
 
@@ -171,9 +172,9 @@ st.markdown(f"""
     <style>
     .floating-wa-button {{
         position: fixed;
-        bottom: 30px;
-        right: 30px;
-        z-index: 9999;
+        bottom: 80px;  /* 👈 इसे 30px से बढ़ाकर 80px कर दिया गया है ताकि यह बैज के ऊपर दिखे */
+        right: 20px;   /* 👈 स्क्रीन के किनारे से थोड़ी और सही दूरी */
+        z-index: 999999; /* 👈 z-index बढ़ा दिया ताकि यह हमेशा सबसे ऊपर रहे */
     }}
     .wa-btn {{
         background-color: #25D366;
