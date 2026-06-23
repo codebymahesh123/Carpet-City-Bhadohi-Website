@@ -1,24 +1,21 @@
 import streamlit as st
 # --- HIDE STREAMLIT BRANDING ---
 # --- HIDE STREAMLIT BRANDING & FLOATING BADGES ---
+# --- HIDE STREAMLIT BRANDING (AGGRESSIVE MODE) ---
 hide_streamlit_style = """
 <style>
-/* Default footer aur top-right menu ko hide karne ke liye */
-#MainMenu {visibility: hidden;}
-footer {visibility: hidden;}
-header {visibility: hidden;}
+/* Default Header aur Footer ko hide karein */
+header {visibility: hidden !important;}
+footer {visibility: hidden !important;}
 
-/* 'Hosted with Streamlit' floating badge ko hide karne ke liye */
-.viewerBadge_container {display: none !important;}
-.viewerBadge_link {display: none !important;}
+/* Streamlit Cloud Viewer Badge aur Deploy Button ko hide karein */
+[data-testid="stAppDeployButton"] {display: none !important; visibility: hidden !important;}
+[class^="viewerBadge"] {display: none !important; visibility: hidden !important;}
+[class^="stDeployButton"] {display: none !important; visibility: hidden !important;}
+[data-testid="stToolbar"] {display: none !important; visibility: hidden !important;}
 
-/* 'Manage App' aur profile avatar (jo red color me dikh raha hai) ko hide karne ke liye */
-div[data-testid="stAppDeployButton"] {display: none !important;}
-div[data-testid="stStatusWidget"] {display: none !important;}
-div[data-testid="stToolbar"] {display: none !important;}
-
-/* Kisi bhi embedded meta info ko hide karne ke liye */
-.embeddedAppMetaInfoBar_container {display: none !important;}
+/* Link tag jispar streamlit cloud ka URL ho, use block karein */
+a[href^="https://streamlit.io/cloud"] {display: none !important;}
 </style>
 """
 st.markdown(hide_streamlit_style, unsafe_allow_html=True)
