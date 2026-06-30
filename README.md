@@ -44,4 +44,5 @@ To run this project on your local machine, follow these steps:
 ### 1. Clone the repository
 ```bash
 git clone https://github.com/codebymahesh123/Carpet-City-Bhadohi-Website.git
-cd The Carpet city
+cd Carpet-City-Bhadohi-Website
+
