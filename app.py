@@ -40,7 +40,7 @@ except Exception as e:
 # 1. Page Configuration
 st.set_page_config(
     page_title="Carpet City Bhadohi Rugs", 
-    page_icon="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/Gemini_Generated_Image_6yxoi0.png", # Local path hatakar emoji lagaya hai taaki live app crash na ho
+    page_icon="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg", # Local path hatakar emoji lagaya hai taaki live app crash na ho
     layout="wide",
     initial_sidebar_state="collapsed" # Sidebar by default band rahega clean look ke liye
 )
