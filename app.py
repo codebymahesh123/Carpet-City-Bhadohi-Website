@@ -354,10 +354,10 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
             st.markdown("### 🚚 Delivery Details")
             with st.form("checkout_form"):
                 customer_name = st.text_input(
-                    "Full Name *", placeholder="e.g., Rahul Sharma"
+                    "Full Name *", placeholder="Enter Your Name"
                 )
                 phone = st.text_input(
-                    "Mobile Number *", placeholder="e.g., 9876543210"
+                    "Mobile Number *", placeholder="Enter Your 10 Digit Phone Number"
                 )
                 address = st.text_area(
                     "Full Delivery Address *",
@@ -365,7 +365,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                     height=100,
                 )
                 pincode = st.text_input(
-                    "PIN Code *", max_chars=6, placeholder="e.g., 221401"
+                    "PIN Code *", max_chars=6, placeholder="Enter Your 4 Digit PinCode"
                 )
 
                 submit_order = st.form_submit_button(
