@@ -123,7 +123,7 @@ with nav_col1:
     # <img> tag use karke apna custom logo lagayein
     st.markdown("""
         <div class='brand-title'>
-            <img src="D:\The carpet city\WhatsApp Image 2026-07-31 at 2.45.21 PM.jpeg   " width="50" height="50" style="vertical-align: middle; margin-right: 10px; border-radius: 8px; margin-bottom: 8px;"> 
+            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg" width="50" height="50" style="vertical-align: middle; margin-right: 10px; border-radius: 8px; margin-bottom: 8px;"> 
             SM Carpet City
         </div>
     """, unsafe_allow_html=True)
