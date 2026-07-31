@@ -136,7 +136,14 @@ except Exception as e:
 nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([3, 1, 1, 1])
 
 with nav_col1:
-    st.markdown("<div class='brand-title'>👑 SM Carpet City</div>", unsafe_allow_html=True)
+    # <img> tag use karke apna custom logo lagayein
+    st.markdown("""
+        <div class='brand-title'>
+            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg" width="40" height="40" style="vertical-align: middle; margin-right: 8px; border-radius: 4px; margin-bottom: 4px;"> 
+            SM Carpet City
+        </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("<div class='brand-subtitle'>Explore Premium Bhadohi Rugs</div>", unsafe_allow_html=True)
 
 with nav_col2:
