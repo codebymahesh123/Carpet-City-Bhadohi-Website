@@ -571,3 +571,142 @@ elif st.session_state.page == "⚙️ Admin Panel":
                         
                     except Exception as e:
                         st.error(f"❌ Error adding product to Database: {e}")
+
+                        # --- 4. LIGHT & TRUSTED MODERN FOOTER ---
+trusted_light_footer = """
+<style>
+.trust-footer {
+    background-color: #ffffff; /* Lighter premium background */
+    color: #475569;
+    padding: 60px 40px 20px 40px;
+    font-family: 'Arial', sans-serif;
+    margin-top: 80px;
+    border-top: 4px solid #2874f0; /* Flipkart Blue accent */
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.04); /* Soft shadow on top */
+    width: 100%;
+}
+.tf-container {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin: 0 auto;
+    gap: 30px;
+}
+.tf-col {
+    flex: 1;
+    min-width: 220px;
+}
+.tf-col h4 {
+    color: #0f172a; /* Dark text for headings */
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.tf-col p {
+    font-size: 14px;
+    line-height: 1.8;
+    color: #475569;
+}
+.tf-col a {
+    color: #64748b;
+    text-decoration: none;
+    font-size: 15px;
+    line-height: 2.2;
+    display: flex;
+    align-items: center;
+    transition: color 0.3s ease;
+}
+.tf-col a::before {
+    content: '▸';
+    margin-right: 8px;
+    color: #2874f0;
+    font-size: 18px;
+}
+.tf-col a:hover {
+    color: #2874f0; /* Turns website blue on hover */
+    font-weight: 600;
+}
+.trust-badges {
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #16a34a; /* Trust Green */
+    background: #f0fdf4;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #bbf7d0;
+}
+.tf-bottom {
+    text-align: left;
+    padding-top: 25px;
+    border-top: 1px solid #e2e8f0;
+    margin-top: 40px;
+    font-size: 13px;
+    color: #64748b;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.tf-bottom b {
+    color: #334155;
+}
+.secure-payments {
+    font-size: 20px;
+    letter-spacing: 8px;
+}
+</style>
+
+<div class="trust-footer">
+    <div class="tf-container">
+        <div class="tf-col">
+            <h4>SM Carpet City</h4>
+            <p>Premium Rugs & Carpets straight from the weavers of Bhadohi. Delivering quality and authenticity globally.</p>
+            <div class="trust-badges">
+                <div class="badge">🔒 100% Secure Checkout</div>
+                <div class="badge">✅ Verified Premium Seller</div>
+            </div>
+        </div>
+        <div class="tf-col">
+            <h4>Quick Links</h4>
+            <a href="#">Shop All Rugs</a>
+            <a href="#">Track Your Order</a>
+            <a href="#">Help & Support</a>
+            <a href="#">About Us</a>
+        </div>
+        <div class="tf-col">
+            <h4>Legal & Policies</h4>
+            <a href="#">Privacy Policy</a>
+            <a href="#">Terms & Conditions</a>
+            <a href="#">Return & Refund Policy</a>
+            <a href="#">Secure Payment Policy</a>
+        </div>
+        <div class="tf-col">
+            <h4>Contact Us</h4>
+            <p>📍 Sector 11, Main Market,<br>Bhadohi, UP - 221401</p>
+            <p>📞 +91-8009076300</p>
+            <p>✉️ support@smcarpetcity.com</p>
+        </div>
+    </div>
+    <div class="tf-bottom">
+        <span>© 2026-2027 <b>SM Carpet City</b>. All Rights Reserved. | Protected & Secured.</span>
+        <span class="secure-payments">💳 🏦 📱</span>
+    </div>
+</div>
+"""
+
+# Render the footer at the very bottom of the page execution
+st.markdown(trusted_light_footer, unsafe_allow_html=True)
