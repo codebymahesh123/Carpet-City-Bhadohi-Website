@@ -335,16 +335,34 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
             st.markdown("---")
             st.markdown(f"### **Total Amount: ₹{total_amount}**")
             
-        with col_summary:
+with col_summary:
             st.markdown("### 🚚 Delivery Details")
             with st.form("checkout_form"):
-                customer_name = st.text_input("Full Name *")
-                phone = st.text_input("Mobile Number *")
-                address = st.text_area("Full Delivery Address *")
-                pincode = st.text_input("PIN Code *", max_chars=6)
+                # Added placeholders for a modern, guided user experience
+                customer_name = st.text_input(
+                    "Full Name *", 
+                    placeholder="e.g., Rahul Sharma"
+                )
                 
-                # Button click hote hi DB me save hoga
-                submit_order = st.form_submit_button("Proceed to Pay", type="primary", use_container_width=True)
+                phone = st.text_input(
+                    "Mobile Number *", 
+                    placeholder="e.g., 9876543210"
+                )
+                
+                address = st.text_area(
+                    "Full Delivery Address *", 
+                    placeholder="House/Flat No., Building Name, Street, Landmark, City...",
+                    height=100
+                )
+                
+                pincode = st.text_input(
+                    "PIN Code *", 
+                    max_chars=6, 
+                    placeholder="e.g., 221401"
+                )
+                
+                # Added a small rocket emoji to the button for a better CTA (Call to Action)
+                submit_order = st.form_submit_button("Proceed to Pay 🚀", type="primary", use_container_width=True)
                 
                 if submit_order:
                     if not customer_name or not phone or not address or not pincode:
