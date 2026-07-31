@@ -300,7 +300,8 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                 st.session_state.page = "🛍️ Product Catalog"
                 st.rerun()
 
-    # 2. Agar cart khali hai (aur order place nahi hua hai)
+    # 2. Agar cart khali hai (aur order place nahi h
+    ua hai)
     elif not st.session_state.cart:
         st.info("Your Cart is Empty. Please add items from the Home page.")
 
@@ -454,35 +455,99 @@ elif st.session_state.page == "⚙️ Admin Panel":
 
    # --- ADMIN DASHBOARD (VISIBLE ONLY AFTER LOGIN) ---
     else:
-        # Reset back to light theme for the dashboard to match your app
+        # Enhanced CSS for a realistic, clean, and modern admin panel
         st.markdown("""
             <style>
-            .stApp { background-color: #f1f3f6 !important; color: #212121 !important; }
+            /* Main background and text */
+            .stApp { 
+                background-color: #f8f9fa !important; 
+                color: #2b2b2b !important; 
+            }
+            
+            /* Styling the form container like a modern card */
+            [data-testid="stForm"] {
+                background-color: #ffffff;
+                border-radius: 12px;
+                padding: 30px;
+                box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
+                border: 1px solid #eaeaea;
+            }
+            
+            /* Styling the submit button */
+            [data-testid="stFormSubmitButton"] button {
+                background-color: #4CAF50 !important;
+                color: white !important;
+                border-radius: 8px !important;
+                font-weight: 600 !important;
+                padding: 10px 24px !important;
+                border: none !important;
+                transition: 0.3s !important;
+            }
+            [data-testid="stFormSubmitButton"] button:hover {
+                background-color: #45a049 !important;
+                box-shadow: 0px 4px 12px rgba(76, 175, 80, 0.3) !important;
+            }
             </style>
         """, unsafe_allow_html=True)
 
+        # --- HEADER SECTION ---
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.subheader("⚙️ Admin Dashboard - Manage Catalog")
+            st.markdown("## ⚙️ Admin Dashboard")
+            st.markdown("<p style='color: #666; margin-top: -15px;'>Manage your Dari/Rug catalog efficiently.</p>", unsafe_allow_html=True)
         with col2:
+            st.write("") # Spacing
             if st.button("Logout 🔴", use_container_width=True):
                 st.session_state.admin_logged_in = False
                 st.rerun()
 
-        st.markdown("---")
+        st.divider()
         
-        # FIX 1: 'clear_on_submit=True' lagane se form submit hone ke baad apne aap khali ho jayega
+        # --- ADD PRODUCT FORM ---
         with st.form("add_product_form", clear_on_submit=True):
-            new_name = st.text_input("Dari / Rug Name")
-            new_price = st.number_input("Price (₹)", min_value=0, value=0)
-            new_desc = st.text_area("Product Description")
-            new_img_path = st.text_input("Image File Path or URL (e.g. from Supabase Storage)", value="")
+            st.markdown("### ✨ Add New Product")
+            st.markdown("<br>", unsafe_allow_html=True) # Little spacing
             
-            submit_new_prod = st.form_submit_button("Add Product to Catalog", type="primary")
+            # Using columns inside the form for a better UI layout
+            row1_col1, row1_col2 = st.columns(2)
             
+            with row1_col1:
+                # Added placeholder
+                new_name = st.text_input(
+                    "Dari / Rug Name *", 
+                    placeholder="e.g., Persian Floral Silk Rug"
+                )
+                
+            with row1_col2:
+                # Setting value=None allows the placeholder to show up in number_input
+                new_price = st.number_input(
+                    "Price (₹) *", 
+                    min_value=0, 
+                    value=None, 
+                    placeholder="e.g., 2500"
+                )
+                
+            # Full width inputs for URL and Description
+            new_img_path = st.text_input(
+                "Image File Path or URL", 
+                placeholder="https://your-supabase.com/.../rug-image.jpg",
+                help="Paste the direct URL of the image uploaded to your Supabase storage."
+            )
+            
+            new_desc = st.text_area(
+                "Product Description", 
+                placeholder="Briefly describe the material, colors, dimensions, and weaving style...",
+                height=120
+            )
+            
+            st.markdown("<br>", unsafe_allow_html=True)
+            submit_new_prod = st.form_submit_button("➕ Add Product to Catalog")
+            
+            # --- FORM SUBMISSION LOGIC ---
             if submit_new_prod:
-                if new_name == "": 
-                    st.error("Enter the product name!")
+                # Improved validation to check both name and price
+                if not new_name or new_price is None: 
+                    st.warning("⚠️ Please fill in all mandatory fields (Name and Price)!")
                 else:
                     try:
                         product_data = {
@@ -491,14 +556,12 @@ elif st.session_state.page == "⚙️ Admin Panel":
                             "description": new_desc,
                             "image_path": new_img_path
                         }
+                        # Insert data to database
                         supabase.table("products").insert(product_data).execute()
                         
-                        # FIX 2: Sahi tarike se success message show karna
-                        st.success("✅ Your product is added to Website!")
-                        
-                        # (Optional) Thoda aur acha dikhane ke liye balloons ka effect bhi daal sakte hain
+                        # Show success message
+                        st.success(f"✅ Successfully added **{new_name}** to your website!")
                         st.balloons() 
                         
-                        # Yahan se st.rerun() hata diya gaya hai kyunki 'clear_on_submit=True' form clear kar dega
                     except Exception as e:
-                        st.error(f"Error adding product to Database: {e}")
+                        st.error(f"❌ Error adding product to Database: {e}")
