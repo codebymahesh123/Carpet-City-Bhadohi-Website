@@ -128,7 +128,7 @@ try:
     response = supabase.table("products").select("*").order("id").execute()
     st.session_state.products = response.data
 except Exception as e:
-    st.error("Database se products load nahi ho paye!")
+    st.error("Database is not Working! GO to Database !! Warring ")
     st.session_state.products = []
 
 # --- TOP NAVIGATION BAR (Flipkart Style) ---
