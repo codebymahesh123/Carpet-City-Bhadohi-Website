@@ -120,16 +120,13 @@ except Exception as e:
 nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([3, 1, 1, 1])
 
 with nav_col1:
-    st.markdown(
-        """
+    # <img> tag use karke apna custom logo lagayein
+    st.markdown("""
         <div class='brand-title'>
-            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg" class="img-fluid" style="height: 42px; font-size: 12px; vertical-align: middle; margin-right: 8px; border-radius: 4px;"> 
+            <img src="D:\The carpet city\WhatsApp Image 2026-07-31 at 2.45.21 PM.jpeg   " width="50" height="50" style="vertical-align: middle; margin-right: 10px; border-radius: 8px; margin-bottom: 8px;"> 
             SM Carpet City
         </div>
-        <div class='brand-subtitle'>Explore Premium Bhadohi Rugs</div>
-        """,
-        unsafe_allow_html=True,
-    )
+    """, unsafe_allow_html=True)
 
 with nav_col2:
     if st.button("⚙️ Admin", use_container_width=True):
