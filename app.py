@@ -300,8 +300,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                 st.session_state.page = "🛍️ Product Catalog"
                 st.rerun()
 
-    # 2. Agar cart khali hai (aur order place nahi h
-    ua hai)
+    # 2. Agar cart khali hai
     elif not st.session_state.cart:
         st.info("Your Cart is Empty. Please add items from the Home page.")
 
