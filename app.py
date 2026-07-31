@@ -728,7 +728,7 @@ trusted_light_footer = """
         </div>
         <div class="tf-col">
             <h4>Contact Us</h4>
-            <p>📍 Sector 11, Main Market,<br>Bhadohi, UP - 221401</p>
+            <p>📍 Sector 11,Carpet City Nijampur,<br>Bhadohi, UP - 221314</p>
             <p>📞 +91-8009076300</p>
             <p>✉️ support@smcarpetcity.com</p>
         </div>
