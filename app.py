@@ -680,10 +680,10 @@ trusted_light_footer = """
     <div class="tf-bottom">
         <span>© 2026-2027 <b>SM Carpet City</b>. All Rights Reserved. | Protected & Secured.</span>
         <span class="secure-payments">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/UPI-Logo.png/512px-UPI-Logo.png" alt="UPI">
+            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/unified-payment-interface-upi-logo-png_seeklogo-333088.png" alt="UPI">
             <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png" alt="Mastercard">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Rupay-Logo.png/512px-Rupay-Logo.png" alt="RuPay">
+            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/MasterCard_Logo.svg.webp" alt="Mastercard">
+            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/RuPay.svg.webp" alt="RuPay">
         </span>
     </div>
 </div>
