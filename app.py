@@ -1,4 +1,6 @@
 import io
+import time
+import random
 from urllib.parse import quote
 import qrcode
 import streamlit as st
@@ -12,72 +14,104 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- 2. HIDE STREAMLIT BRANDING & LIGHT MODE STYLES ---
+# --- 2. HIDE STREAMLIT BRANDING & LIGHT MODE STYLES & FONTS ---
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+
+    /* Apply Google Font Globally */
+    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, h4, h5, h6 {
+        font-family: 'Poppins', sans-serif !important;
+    }
+
     /* Hide Default Header, Footer, and Toolbar */
     header {visibility: hidden !important;}
     footer {visibility: hidden !important;}
     #MainMenu {visibility: hidden;}
-    
     [data-testid="stAppDeployButton"] {display: none !important; visibility: hidden !important;}
     [class^="viewerBadge"] {display: none !important; visibility: hidden !important;}
     [class^="stDeployButton"] {display: none !important; visibility: hidden !important;}
     [data-testid="stToolbar"] {display: none !important; visibility: hidden !important;}
     a[href^="https://streamlit.io/cloud"] {display: none !important;}
 
-    /* Light Mode Custom Styling (Flipkart Theme) */
+    /* Light Mode Custom Styling (Consistent Theme) */
     [data-testid="stAppViewContainer"] {
-        background-color: #f1f3f6;
+        background-color: #f4f6f9;
         color: #212121;
     }
+    
+    /* Consistent Button Styling */
+    [data-testid="stButton"] button {
+        border-radius: 8px !important;
+        transition: all 0.3s ease !important;
+        font-weight: 600 !important;
+    }
+    [data-testid="stButton"] button[kind="primary"] {
+        background-color: #2874f0 !important;
+        color: white !important;
+        border: none !important;
+    }
+    [data-testid="stButton"] button[kind="primary"]:hover {
+        background-color: #1a5ac6 !important;
+        box-shadow: 0 4px 12px rgba(40, 116, 240, 0.3) !important;
+        transform: translateY(-2px);
+    }
+    
     [data-testid="stHeader"] {
         background-color: transparent;
     }
     .brand-title {
         color: #2874f0;
-        font-family: 'Arial', sans-serif;
         font-weight: 800;
         font-size: 32px;
         margin-top: -15px;
         margin-bottom: 5px;
-    }
-    .brand-subtitle {
-        color: #878787;
-        font-size: 14px;
-        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
     }
     .product-card {
         background-color: #ffffff;
         padding: 20px;
-        border-radius: 4px;
-        box-shadow: 0 2px 4px 0 rgba(0,0,0,.08);
+        border-radius: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,.05);
         margin-bottom: 20px;
         text-align: center;
-        transition: box-shadow 0.3s;
+        transition: all 0.3s ease;
+        border: 1px solid #f0f0f0;
     }
     .product-card:hover {
-        box-shadow: 0 4px 12px 0 rgba(0,0,0,.15);
+        box-shadow: 0 8px 24px rgba(0,0,0,.12);
+        transform: translateY(-5px);
     }
     .product-title {
         font-size: 16px;
-        font-weight: 600;
+        font-weight: 700;
         color: #212121;
-        margin-top: 10px;
+        margin-top: 15px;
         margin-bottom: 5px;
     }
     .product-desc {
         font-size: 13px;
-        color: #878787;
+        color: #757575;
         margin-bottom: 10px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
     }
     .price-text {
-        color: #212121;
-        font-weight: bold;
+        color: #2874f0;
+        font-weight: 800;
         font-size: 22px;
         margin-bottom: 15px;
     }
+    .rating-container {
+        font-size: 14px;
+        margin-bottom: 8px;
+    }
+    .stars { color: #f39c12; }
+    .reviews-count { color: #878787; font-size: 12px; }
     </style>
 """,
     unsafe_allow_html=True,
@@ -87,11 +121,9 @@ st.markdown(
 SUPABASE_URL = st.secrets.get("SUPABASE_URL", "")
 SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "")
 
-
 @st.cache_resource
 def init_supabase():
     return create_client(SUPABASE_URL, SUPABASE_KEY)
-
 
 try:
     supabase: Client = init_supabase()
@@ -101,53 +133,94 @@ except Exception as e:
 # --- 4. SESSION STATE INITIALIZATION ---
 if "page" not in st.session_state:
     st.session_state.page = "🛍️ Product Catalog"
-
 if "admin_logged_in" not in st.session_state:
     st.session_state.admin_logged_in = False
-
 if "cart" not in st.session_state:
     st.session_state.cart = {}
+if "carousel_idx" not in st.session_state:
+    st.session_state.carousel_idx = 0
 
-# FETCH PRODUCTS FROM DATABASE
-try:
-    response = supabase.table("products").select("*").order("id").execute()
-    st.session_state.products = response.data
-except Exception as e:
-    st.error("Database connection issue! Unable to load products.")
-    st.session_state.products = []
+# FETCH PRODUCTS FROM DATABASE WITH LOADING INDICATOR
+if "products" not in st.session_state:
+    with st.spinner("⏳ Fetching premium rugs from our catalog..."):
+        try:
+            response = supabase.table("products").select("*").order("id").execute()
+            st.session_state.products = response.data
+        except Exception as e:
+            st.error("Database connection issue! Unable to load products.")
+            st.session_state.products = []
+
+# --- Helper Functions ---
+def add_to_cart(prod):
+    prod_id = prod["id"]
+    if prod_id in st.session_state.cart:
+        st.session_state.cart[prod_id]["quantity"] += 1
+    else:
+        st.session_state.cart[prod_id] = {
+            "name": prod["name"],
+            "price": prod["price"],
+            "quantity": 1,
+        }
+
+def render_product_card(prod, key_prefix=""):
+    # Generate deterministic mock ratings based on product ID
+    random.seed(prod["id"])
+    rating = round(random.uniform(4.0, 5.0), 1)
+    reviews = random.randint(25, 400)
+    stars_html = f"<span class='stars'>{'★' * int(rating)}{'☆' * (5 - int(rating))}</span>"
+
+    st.markdown("<div class='product-card'>", unsafe_allow_html=True)
+    if not prod.get("image_path"):
+        st.warning("📸 No Image Available")
+    else:
+        try:
+            st.image(prod["image_path"], use_container_width=True)
+        except Exception:
+            st.error("Image failed to load")
+    st.markdown(
+        f"""
+        <div class='product-title'>{prod['name']}</div>
+        <div class='rating-container'>{stars_html} <span class='reviews-count'>{rating} ({reviews} reviews)</span></div>
+        <div class='product-desc'>{prod['description']}</div>
+        <div class='price-text'>₹{prod['price']}</div>
+    """,
+        unsafe_allow_html=True,
+    )
+    btn_col1, btn_col2 = st.columns(2)
+    with btn_col1:
+        if st.button("Cart 🛒", key=f"add_{key_prefix}_{prod['id']}", use_container_width=True):
+            add_to_cart(prod)
+            st.toast("🛒 Added to Cart!")
+    with btn_col2:
+        if st.button("Buy ⚡", key=f"buy_{key_prefix}_{prod['id']}", use_container_width=True, type="primary"):
+            add_to_cart(prod)
+            st.session_state.page = "🛒 Shopping Cart & Checkout"
+            st.rerun()
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 # --- 5. TOP NAVIGATION BAR ---
 nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([3, 1, 1, 1])
-
 with nav_col1:
-    # <img> tag use karke apna custom logo lagayein
     st.markdown("""
         <div class='brand-title'>
-            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg" width="50" height="50" style="vertical-align: middle; margin-right: 10px; border-radius: 8px; margin-bottom: 8px;"> 
+            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg" width="45" height="45" style="border-radius: 8px; margin-right: 12px;"> 
             SM Carpet City
         </div>
     """, unsafe_allow_html=True)
-
 with nav_col2:
     if st.button("⚙️ Admin", use_container_width=True):
         st.session_state.page = "⚙️ Admin Panel"
         st.rerun()
-
 with nav_col3:
     if st.button("🏠 Home", use_container_width=True):
         st.session_state.page = "🛍️ Product Catalog"
         st.rerun()
-
 with nav_col4:
-    cart_items = sum(
-        item["quantity"] for item in st.session_state.cart.values()
-    )
-    if st.button(
-        f"🛒 Cart ({cart_items})", use_container_width=True, type="primary"
-    ):
+    cart_items = sum(item["quantity"] for item in st.session_state.cart.values())
+    if st.button(f"🛒 Cart ({cart_items})", use_container_width=True, type="primary"):
         st.session_state.page = "🛒 Shopping Cart & Checkout"
         st.rerun()
-
 st.markdown("---")
 
 # --- 6. SIDEBAR NAVIGATION ---
@@ -159,7 +232,6 @@ if st.sidebar.button("Admin Panel (Add Rug)", use_container_width=True):
 # --- 7. FLOATING WHATSAPP BUTTON ---
 YOUR_WHATSAPP_NUMBER = "918009076300"
 wa_link = f"https://wa.me/{YOUR_WHATSAPP_NUMBER}?text=Hello,%20I%20want%20to%20know%20more%20about%20your%20carpets!"
-
 st.markdown(
     f"""
     <style>
@@ -198,184 +270,137 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-
 # --- PAGE 1: PRODUCT CATALOG ---
 if st.session_state.page == "🛍️ Product Catalog":
     if not st.session_state.products:
-        st.info("No products found in the database.")
+        st.info("No products found in the database. Please check back later!")
     else:
-        cols = st.columns(3)
-        for idx, prod in enumerate(st.session_state.products):
-            with cols[idx % 3]:
-                st.markdown(
-                    "<div class='product-card'>", unsafe_allow_html=True
-                )
+        # --- FEATURED PRODUCTS CAROUSEL ---
+        st.markdown("### 🌟 Featured Collections")
+        featured_products = st.session_state.products[:5]  # Taking top 5 as featured
+        
+        if len(featured_products) > 0:
+            c_prev, c_cards, c_next = st.columns([1, 10, 1], gap="small")
+            
+            with c_prev:
+                st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
+                if st.button("◀", key="prev_btn", use_container_width=True):
+                    st.session_state.carousel_idx = (st.session_state.carousel_idx - 1) % len(featured_products)
+                    
+            with c_cards:
+                display_qty = min(3, len(featured_products))
+                f_cols = st.columns(display_qty)
+                for i in range(display_qty):
+                    prod_idx = (st.session_state.carousel_idx + i) % len(featured_products)
+                    with f_cols[i]:
+                        render_product_card(featured_products[prod_idx], key_prefix=f"feat_{prod_idx}")
+                        
+            with c_next:
+                st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
+                if st.button("▶", key="next_btn", use_container_width=True):
+                    st.session_state.carousel_idx = (st.session_state.carousel_idx + 1) % len(featured_products)
+        
+        st.markdown("---")
+        
+        # --- SEARCH & FILTER BAR ---
+        col_search, col_filter = st.columns([3, 1])
+        with col_search:
+            search_query = st.text_input("🔍 Search our catalog by name or description...", placeholder="e.g. Persian, Silk, Floral...")
+        with col_filter:
+            sort_by = st.selectbox("Sort By", ["Relevance", "Price: Low to High", "Price: High to Low"])
+            
+        # Filter and Sort Logic
+        filtered_prods = [
+            p for p in st.session_state.products 
+            if search_query.lower() in p['name'].lower() or search_query.lower() in p['description'].lower()
+        ]
+        
+        if sort_by == "Price: Low to High":
+            filtered_prods = sorted(filtered_prods, key=lambda x: x['price'])
+        elif sort_by == "Price: High to Low":
+            filtered_prods = sorted(filtered_prods, key=lambda x: x['price'], reverse=True)
 
-                if not prod.get("image_path"):
-                    st.warning("📸 No Image Available")
-                else:
-                    try:
-                        st.image(prod["image_path"], use_container_width=True)
-                    except Exception:
-                        st.error("Image failed to load")
-
-                st.markdown(
-                    f"""
-                    <div class='product-title'>{prod['name']}</div>
-                    <div class='product-desc'>{prod['description']}</div>
-                    <div class='price-text'>₹{prod['price']}</div>
-                """,
-                    unsafe_allow_html=True,
-                )
-
-                btn_col1, btn_col2 = st.columns(2)
-                with btn_col1:
-                    if st.button(
-                        "Cart 🛒",
-                        key=f"add_{prod['id']}",
-                        use_container_width=True,
-                    ):
-                        prod_id = prod["id"]
-                        if prod_id in st.session_state.cart:
-                            st.session_state.cart[prod_id]["quantity"] += 1
-                        else:
-                            st.session_state.cart[prod_id] = {
-                                "name": prod["name"],
-                                "price": prod["price"],
-                                "quantity": 1,
-                            }
-                        st.toast("🛒 Added to Cart!")
-
-                with btn_col2:
-                    if st.button(
-                        "Buy ⚡",
-                        key=f"buy_{prod['id']}",
-                        use_container_width=True,
-                        type="primary",
-                    ):
-                        prod_id = prod["id"]
-                        if prod_id in st.session_state.cart:
-                            st.session_state.cart[prod_id]["quantity"] += 1
-                        else:
-                            st.session_state.cart[prod_id] = {
-                                "name": prod["name"],
-                                "price": prod["price"],
-                                "quantity": 1,
-                            }
-                        st.session_state.page = "🛒 Shopping Cart & Checkout"
-                        st.rerun()
-
-                st.markdown("</div>", unsafe_allow_html=True)
-
+        st.markdown("### 🏷️ All Products")
+        if not filtered_prods:
+            st.warning("No products matched your search. Try different keywords.")
+        else:
+            cols = st.columns(3)
+            for idx, prod in enumerate(filtered_prods):
+                with cols[idx % 3]:
+                    render_product_card(prod, key_prefix="all")
 
 # --- PAGE 2: CART & CHECKOUT ---
 elif st.session_state.page == "🛒 Shopping Cart & Checkout":
     if "order_ready" in st.session_state:
-        st.success(
-            f"✅ Order Confirmed for {st.session_state.order_ready['name']}! Delivery details saved."
-        )
-
+        st.success(f"✅ Order Confirmed for {st.session_state.order_ready['name']}! Delivery details saved.")
         YOUR_UPI_ID = "maheshsing221314-3@okaxis"
         YOUR_NAME = "MAHESH MAURYA"
-
         tn_note = quote(f"Order for {st.session_state.order_ready['name']}")
         pn_name = quote(YOUR_NAME)
         upi_url = f"upi://pay?pa={YOUR_UPI_ID}&pn={pn_name}&am={st.session_state.order_ready['amount']}&cu=INR&tn={tn_note}"
-
+        
         st.markdown("### 📱 Complete Your Payment")
-        st.info(f"Amount to Pay: ₹{st.session_state.order_ready['amount']}")
-
+        st.info(f"Amount to Pay: **₹{st.session_state.order_ready['amount']}**")
+        
         col_qr, col_btn = st.columns([1, 2])
         with col_qr:
             qr = qrcode.QRCode(version=1, box_size=10, border=4)
             qr.add_data(upi_url)
             qr.make(fit=True)
             img = qr.make_image(fill_color="black", back_color="white")
-
             buf = io.BytesIO()
             img.save(buf, format="PNG")
             byte_im = buf.getvalue()
-
-            st.image(
-                byte_im, width=200, caption="Scan via PhonePe, GPay, Paytm"
-            )
-
+            st.image(byte_im, width=200, caption="Scan via PhonePe, GPay, Paytm")
         with col_btn:
             st.markdown("<br>", unsafe_allow_html=True)
             st.markdown(
-                f'<a href="{upi_url}" target="_blank"><button style="background-color:#2874f0; color:white; padding:12px 24px; border:none; border-radius:5px; font-size:16px; cursor:pointer; font-weight:bold; width:100%;">Pay via UPI App (Click Here) 🚀</button></a>',
+                f'<a href="{upi_url}" target="_blank"><button style="background-color:#2874f0; color:white; padding:15px 24px; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:bold; width:100%; font-family:\'Poppins\', sans-serif;">Pay via UPI App (Click Here) 🚀</button></a>',
                 unsafe_allow_html=True,
             )
-            st.write("Click above if paying from mobile.")
-
-            st.markdown("<br><br>", unsafe_allow_html=True)
+            st.markdown("<p style='text-align:center; font-size:14px; margin-top:8px;'>Click above if paying directly from a mobile device.</p>", unsafe_allow_html=True)
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("Shop More 🛍️", use_container_width=True):
                 del st.session_state.order_ready
                 st.session_state.page = "🛍️ Product Catalog"
                 st.rerun()
-
     elif not st.session_state.cart:
-        st.info(
-            "Your Cart is Empty. Please add items from the Product Catalog."
-        )
-
+        st.info("Your Cart is Empty. Please add items from the Product Catalog.")
     else:
         col_cart, col_summary = st.columns([2, 1])
         total_amount = 0
-
         with col_cart:
-            st.markdown("# 🛒 My Cart")
+            st.markdown("### 🛒 My Cart")
             for p_id, item in list(st.session_state.cart.items()):
                 c1, c2, c3, c4 = st.columns([3, 1, 1, 1])
                 c1.write(f"**{item['name']}**")
                 c2.write(f"₹{item['price']}")
-
                 new_qty = c3.number_input(
-                    "Qty",
-                    min_value=1,
-                    value=item["quantity"],
-                    key=f"qty_{p_id}",
-                    label_visibility="collapsed",
+                    "Qty", min_value=1, value=item["quantity"], key=f"qty_{p_id}", label_visibility="collapsed"
                 )
                 st.session_state.cart[p_id]["quantity"] = new_qty
                 total_amount += item["price"] * new_qty
-
                 if c4.button("🗑️", key=f"rem_{p_id}"):
                     del st.session_state.cart[p_id]
                     st.rerun()
-
             st.markdown("---")
-            st.markdown(f"### **Total Amount: ₹{total_amount}**")
-
+            st.markdown(f"#### **Total Amount: <span style='color:#2874f0;'>₹{total_amount}</span>**", unsafe_allow_html=True)
+            
         with col_summary:
             st.markdown("### 🚚 Delivery Details")
             with st.form("checkout_form"):
-                customer_name = st.text_input(
-                    "Full Name *", placeholder="Enter Your Name"
-                )
-                phone = st.text_input(
-                    "Mobile Number *", placeholder="Enter Your 10 Digit Phone Number"
-                )
+                customer_name = st.text_input("Full Name *", placeholder="Enter Your Name")
+                phone = st.text_input("Mobile Number *", placeholder="Enter Your 10 Digit Phone Number")
                 address = st.text_area(
                     "Full Delivery Address *",
                     placeholder="House/Flat No., Building Name, Street, Landmark, City...",
                     height=100,
                 )
-                pincode = st.text_input(
-                    "PIN Code *", max_chars=6, placeholder="Enter Your 4 Digit PinCode"
-                )
-
-                submit_order = st.form_submit_button(
-                    "Proceed to Pay 🚀", type="primary", use_container_width=True
-                )
-
+                pincode = st.text_input("PIN Code *", max_chars=6, placeholder="Enter Your 4 Digit PinCode")
+                
+                submit_order = st.form_submit_button("Proceed to Pay 🚀", type="primary", use_container_width=True)
                 if submit_order:
-                    if (
-                        not customer_name
-                        or not phone
-                        or not address
-                        or not pincode
-                    ):
+                    if not customer_name or not phone or not address or not pincode:
                         st.error("Please fill all required fields!")
                     elif not phone.isdigit() or len(phone) != 10:
                         st.error("Please enter a valid 10-digit phone number")
@@ -391,19 +416,10 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                             "total_amount": int(total_amount),
                             "payment_status": "Pending",
                         }
-
                         try:
-                            with st.spinner(
-                                "🔒 Securing connection & generating your order..."
-                            ):
-                                import time
-
+                            with st.spinner("🔒 Securing connection & generating your order..."):
                                 time.sleep(1.5)
-
-                                supabase.table("orders").insert(
-                                    order_data
-                                ).execute()
-
+                                supabase.table("orders").insert(order_data).execute()
                                 st.session_state.order_ready = {
                                     "name": customer_name,
                                     "amount": total_amount,
@@ -412,15 +428,10 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                                     "pincode": pincode,
                                 }
                                 st.session_state.cart = {}
-
-                            st.toast(
-                                "📦 Order initialized successfully!", icon="🚀"
-                            )
+                            st.toast("📦 Order initialized successfully!", icon="🚀")
                             st.rerun()
-
                         except Exception as e:
                             st.error(f"Failed to save order in Database: {e}")
-
 
 # --- PAGE 3: ADMIN PANEL ---
 elif st.session_state.page == "⚙️ Admin Panel":
@@ -437,7 +448,7 @@ elif st.session_state.page == "⚙️ Admin Panel":
                 background: rgba(10, 25, 47, 0.8);
                 border: 2px solid #00ffcc;
                 box-shadow: 0 0 15px #00ffcc, inset 0 0 10px #00ffcc;
-                border-radius: 10px;
+                border-radius: 12px;
                 padding: 40px;
                 max-width: 450px;
                 margin: auto;
@@ -456,55 +467,39 @@ elif st.session_state.page == "⚙️ Admin Panel":
         """,
             unsafe_allow_html=True,
         )
-
         st.markdown("<div class='cyber-box'>", unsafe_allow_html=True)
-        st.markdown(
-            "<div class='cyber-title'>[ SYSTEM_ACCESS ]</div>",
-            unsafe_allow_html=True,
-        )
-
+        st.markdown("<div class='cyber-title'>[ SYSTEM_ACCESS ]</div>", unsafe_allow_html=True)
         admin_user = st.text_input("USER ID", placeholder="Enter Username")
-        admin_pass = st.text_input(
-            "PASSWORD", type="password", placeholder="Enter Password"
-        )
-
+        admin_pass = st.text_input("PASSWORD", type="password", placeholder="Enter Password")
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button(
-            "INITIALIZE LOGIN ⚡", use_container_width=True, type="primary"
-        ):
+        if st.button("INITIALIZE LOGIN ⚡", use_container_width=True, type="primary"):
             if admin_user and admin_pass:
-                try:
-                    response = (
-                        supabase.table("admins")
-                        .select("*")
-                        .eq("username", admin_user)
-                        .eq("password", admin_pass)
-                        .execute()
-                    )
-
-                    if len(response.data) > 0:
-                        st.session_state.admin_logged_in = True
-                        st.success("ACCESS GRANTED. Welcome to Mainframe.")
-                        st.rerun()
-                    else:
-                        st.error("ACCESS DENIED: Invalid Credentials!")
-                except Exception as e:
-                    st.error(
-                        f"SYSTEM ERROR: Could not connect to Auth Database. {e}"
-                    )
+                with st.spinner("Authenticating..."):
+                    try:
+                        response = (
+                            supabase.table("admins")
+                            .select("*")
+                            .eq("username", admin_user)
+                            .eq("password", admin_pass)
+                            .execute()
+                        )
+                        if len(response.data) > 0:
+                            st.session_state.admin_logged_in = True
+                            st.success("ACCESS GRANTED. Welcome to Mainframe.")
+                            time.sleep(1)
+                            st.rerun()
+                        else:
+                            st.error("ACCESS DENIED: Invalid Credentials!")
+                    except Exception as e:
+                        st.error(f"SYSTEM ERROR: Could not connect to Auth Database. {e}")
             else:
                 st.warning("Please provide complete credentials.")
-
         st.markdown("</div>", unsafe_allow_html=True)
-
     else:
         st.markdown(
             """
             <style>
-            .stApp { 
-                background-color: #f8f9fa !important; 
-                color: #2b2b2b !important; 
-            }
+            .stApp { background-color: #f4f6f9 !important; color: #2b2b2b !important; }
             [data-testid="stForm"] {
                 background-color: #ffffff;
                 border-radius: 12px;
@@ -512,106 +507,67 @@ elif st.session_state.page == "⚙️ Admin Panel":
                 box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
                 border: 1px solid #eaeaea;
             }
-            [data-testid="stFormSubmitButton"] button {
-                background-color: #4CAF50 !important;
-                color: white !important;
-                border-radius: 8px !important;
-                font-weight: 600 !important;
-                padding: 10px 24px !important;
-                border: none !important;
-                transition: 0.3s !important;
-            }
-            [data-testid="stFormSubmitButton"] button:hover {
-                background-color: #45a049 !important;
-                box-shadow: 0px 4px 12px rgba(76, 175, 80, 0.3) !important;
-            }
             </style>
         """,
             unsafe_allow_html=True,
         )
-
         col1, col2 = st.columns([4, 1])
         with col1:
             st.markdown("## ⚙️ Admin Dashboard")
-            st.markdown(
-                "<p style='color: #666; margin-top: -15px;'>Manage your Dari/Rug catalog efficiently.</p>",
-                unsafe_allow_html=True,
-            )
+            st.markdown("<p style='color: #666; margin-top: -15px;'>Manage your Dari/Rug catalog efficiently.</p>", unsafe_allow_html=True)
         with col2:
             if st.button("Logout 🔴", use_container_width=True):
                 st.session_state.admin_logged_in = False
                 st.rerun()
-
         st.divider()
-
         with st.form("add_product_form", clear_on_submit=True):
             st.markdown("### ✨ Add New Product")
             st.markdown("<br>", unsafe_allow_html=True)
-
             row1_col1, row1_col2 = st.columns(2)
-
             with row1_col1:
-                new_name = st.text_input(
-                    "Dari / Rug Name *",
-                    placeholder="e.g., Persian Floral Silk Rug",
-                )
-
+                new_name = st.text_input("Dari / Rug Name *", placeholder="e.g., Persian Floral Silk Rug")
             with row1_col2:
-                new_price = st.number_input(
-                    "Price (₹) *",
-                    min_value=0,
-                    value=None,
-                    placeholder="e.g., 2500",
-                )
-
+                new_price = st.number_input("Price (₹) *", min_value=0, value=None, placeholder="e.g., 2500")
+            
             new_img_path = st.text_input(
                 "Image File Path or URL",
                 placeholder="https://your-supabase.com/.../rug-image.jpg",
                 help="Paste the direct URL of the image uploaded to your Supabase storage.",
             )
-
-            new_desc = st.text_area(
-                "Product Description",
-                placeholder="Briefly describe material, colors, dimensions...",
-                height=120,
-            )
-
+            new_desc = st.text_area("Product Description", placeholder="Briefly describe material, colors, dimensions...", height=120)
+            
             st.markdown("<br>", unsafe_allow_html=True)
-            submit_new_prod = st.form_submit_button(
-                "➕ Add Product to Catalog"
-            )
-
+            submit_new_prod = st.form_submit_button("➕ Add Product to Catalog", type="primary")
+            
             if submit_new_prod:
                 if not new_name or new_price is None:
-                    st.warning(
-                        "⚠️ Please fill in all mandatory fields (Name and Price)!"
-                    )
+                    st.warning("⚠️ Please fill in all mandatory fields (Name and Price)!")
                 else:
-                    try:
-                        product_data = {
-                            "name": new_name,
-                            "price": int(new_price),
-                            "description": new_desc,
-                            "image_path": new_img_path,
-                        }
-                        supabase.table("products").insert(
-                            product_data
-                        ).execute()
-                        st.success(
-                            f"✅ Successfully added **{new_name}** to your catalog!"
-                        )
-                        st.balloons()
-                    except Exception as e:
-                        st.error(f"❌ Error adding product to Database: {e}")
+                    with st.spinner("Adding product to database..."):
+                        try:
+                            product_data = {
+                                "name": new_name,
+                                "price": int(new_price),
+                                "description": new_desc,
+                                "image_path": new_img_path,
+                            }
+                            supabase.table("products").insert(product_data).execute()
+                            st.success(f"✅ Successfully added **{new_name}** to your catalog!")
+                            
+                            # Trigger re-fetch for products next run
+                            if "products" in st.session_state:
+                                del st.session_state.products 
+                            st.balloons()
+                        except Exception as e:
+                            st.error(f"❌ Error adding product to Database: {e}")
 
-# --- 8. FOOTER RENDER ---
+# --- 8. FOOTER RENDER (WITH POLISHED PAYMENT ICONS) ---
 trusted_light_footer = """
 <style>
 .trust-footer {
     background-color: #ffffff;
     color: #475569;
     padding: 60px 40px 20px 40px;
-    font-family: 'Arial', sans-serif;
     margin-top: 80px;
     border-top: 4px solid #2874f0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
@@ -625,10 +581,7 @@ trusted_light_footer = """
     margin: 0 auto;
     gap: 30px;
 }
-.tf-col {
-    flex: 1;
-    min-width: 220px;
-}
+.tf-col { flex: 1; min-width: 220px; }
 .tf-col h4 {
     color: #0f172a;
     margin-bottom: 20px;
@@ -637,11 +590,7 @@ trusted_light_footer = """
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-.tf-col p {
-    font-size: 14px;
-    line-height: 1.8;
-    color: #475569;
-}
+.tf-col p { font-size: 14px; line-height: 1.8; color: #475569; }
 .tf-col a {
     color: #64748b;
     text-decoration: none;
@@ -652,15 +601,9 @@ trusted_light_footer = """
     transition: color 0.3s ease;
 }
 .tf-col a::before {
-    content: '▸';
-    margin-right: 8px;
-    color: #2874f0;
-    font-size: 18px;
+    content: '▸'; margin-right: 8px; color: #2874f0; font-size: 18px;
 }
-.tf-col a:hover {
-    color: #2874f0;
-    font-weight: 600;
-}
+.tf-col a:hover { color: #2874f0; font-weight: 600; }
 .trust-badges {
     margin-top: 20px;
     display: flex;
@@ -692,16 +635,17 @@ trusted_light_footer = """
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
+    align-items: center;
 }
-.tf-bottom b {
-    color: #334155;
+.tf-bottom b { color: #334155; }
+.secure-payments img {
+    height: 24px;
+    margin-left: 12px;
+    opacity: 0.7;
+    transition: opacity 0.3s;
 }
-.secure-payments {
-    font-size: 20px;
-    letter-spacing: 8px;
-}
+.secure-payments img:hover { opacity: 1; }
 </style>
-
 <div class="trust-footer">
     <div class="tf-container">
         <div class="tf-col">
@@ -728,16 +672,20 @@ trusted_light_footer = """
         </div>
         <div class="tf-col">
             <h4>Contact Us</h4>
-            <p>📍 Sector 11,Carpet City Nijampur,<br>Bhadohi, UP - 221314</p>
+            <p>📍 Sector 11, Carpet City Nijampur,<br>Bhadohi, UP - 221314</p>
             <p>📞 +91-8009076300</p>
             <p>✉️ support@smcarpetcity.com</p>
         </div>
     </div>
     <div class="tf-bottom">
         <span>© 2026-2027 <b>SM Carpet City</b>. All Rights Reserved. | Protected & Secured.</span>
-        <span class="secure-payments">💳 🏦 📱</span>
+        <span class="secure-payments">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/UPI-Logo.png/512px-UPI-Logo.png" alt="UPI">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/200px-Visa_Inc._logo.svg.png" alt="Visa">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/200px-Mastercard-logo.svg.png" alt="Mastercard">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/cb/Rupay-Logo.png/512px-Rupay-Logo.png" alt="RuPay">
+        </span>
     </div>
 </div>
 """
-
 st.markdown(trusted_light_footer, unsafe_allow_html=True)
