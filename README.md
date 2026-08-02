@@ -9,7 +9,7 @@ A modern, fully functional E-Commerce and Catalog platform built entirely with *
 
 ---
 
-## 🚀 Advanced Features Highlight
+## ** Advanced Features Highlight
 
 * **State Management:** Complex cart functionality and user flow managed entirely through Streamlit's `st.session_state` without page reloads.
 * **Dynamic UPI Integration (Deep Linking):** Generates real-time dynamic QR codes for desktop users and utilizes **UPI Intent Links** (`intent://`) for seamless one-click payments on mobile devices (GPay, PhonePe, Paytm).
