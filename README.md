@@ -1,4 +1,4 @@
-# 👑 SM Carpet City - Premium Rugs E-Commerce Platform
+# 🚀 SM Carpet City - Premium Rugs E-Commerce Platform
 
 ![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.30+-red.svg)
