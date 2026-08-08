@@ -8,7 +8,7 @@ from supabase import Client, create_client
 
 # --- 1. PAGE CONFIGURATION (MUST BE THE FIRST STREAMLIT COMMAND) ---
 st.set_page_config(
-    page_title="Carpet City Bhadohi Rugs",
+    page_title="CCBR|E-COMMERCE",
     page_icon="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg",
     layout="wide",
     initial_sidebar_state="collapsed",
