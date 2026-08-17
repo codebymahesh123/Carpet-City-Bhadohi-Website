@@ -1,136 +1,180 @@
 import io
 import time
 import random
+from datetime import datetime
 from urllib.parse import quote
 import qrcode
 import streamlit as st
 from supabase import Client, create_client
 
-# --- 1. PAGE CONFIGURATION (MUST BE THE FIRST STREAMLIT COMMAND) ---
+# ==============================================================================
+# 1. PAGE CONFIGURATION (MUST BE FIRST)
+# ==============================================================================
 st.set_page_config(
-    page_title="CCBR || E-COMMERCE",
+    page_title="SM Carpet City || Handcrafted Rugs & Carpets",
     page_icon="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# --- 2. HIDE STREAMLIT BRANDING & LIGHT MODE STYLES & FONTS ---
+# ==============================================================================
+# 2. GLOBAL STYLES & FONTS
+# ==============================================================================
 st.markdown(
     """
     <style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-    /* Apply Google Font Globally */
-    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, h4, h5, h6 {
+    /* Global Typography */
+    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, h4, h5, h6, input, button {
         font-family: 'Poppins', sans-serif !important;
     }
 
-    /* Hide Default Header, Footer, and Toolbar */
-    header {visibility: hidden !important;}
-    footer {visibility: hidden !important;}
-    #MainMenu {visibility: hidden;}
-    [data-testid="stAppDeployButton"] {display: none !important; visibility: hidden !important;}
-    [class^="viewerBadge"] {display: none !important; visibility: hidden !important;}
-    [class^="stDeployButton"] {display: none !important; visibility: hidden !important;}
-    [data-testid="stToolbar"] {display: none !important; visibility: hidden !important;}
-    a[href^="https://streamlit.io/cloud"] {display: none !important;}
+    /* Clean UI Overrides */
+    header { visibility: hidden !important; }
+    footer { visibility: hidden !important; }
+    #MainMenu { visibility: hidden; }
+    [data-testid="stAppDeployButton"] { display: none !important; }
+    [class^="viewerBadge"] { display: none !important; }
+    [class^="stDeployButton"] { display: none !important; }
+    [data-testid="stToolbar"] { display: none !important; }
 
-    /* Light Mode Custom Styling (Consistent Theme) */
+    /* App Background */
     [data-testid="stAppViewContainer"] {
-        background-color: #f4f6f9;
-        color: #212121;
+        background-color: #f8fafc;
+        color: #1e293b;
     }
     
-    /* Consistent Button Styling */
+    /* Buttons */
     [data-testid="stButton"] button {
         border-radius: 8px !important;
-        transition: all 0.3s ease !important;
+        transition: all 0.25s ease !important;
         font-weight: 600 !important;
     }
     [data-testid="stButton"] button[kind="primary"] {
-        background-color: #2874f0 !important;
+        background-color: #2563eb !important;
         color: white !important;
         border: none !important;
     }
     [data-testid="stButton"] button[kind="primary"]:hover {
-        background-color: #1a5ac6 !important;
-        box-shadow: 0 4px 12px rgba(40, 116, 240, 0.3) !important;
+        background-color: #1d4ed8 !important;
+        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
         transform: translateY(-2px);
     }
     
-    [data-testid="stHeader"] {
-        background-color: transparent;
-    }
+    /* Brand Header */
     .brand-title {
-        color: #2874f0;
+        color: #1e3a8a;
         font-weight: 800;
-        font-size: 32px;
-        margin-top: -15px;
+        font-size: 28px;
+        margin-top: -10px;
         margin-bottom: 5px;
         display: flex;
         align-items: center;
+        text-decoration: none;
     }
+
+    /* Product Cards */
     .product-card {
         background-color: #ffffff;
-        padding: 20px;
-        border-radius: 12px;
-        box-shadow: 0 4px 10px rgba(0,0,0,.05);
-        margin-bottom: 20px;
+        padding: 18px;
+        border-radius: 14px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        margin-bottom: 22px;
         text-align: center;
-        transition: all 0.3s ease;
-        border: 1px solid #f0f0f0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border: 1px solid #e2e8f0;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
     }
     .product-card:hover {
-        box-shadow: 0 8px 24px rgba(0,0,0,.12);
-        transform: translateY(-5px);
+        box-shadow: 0 12px 28px rgba(0,0,0,0.09);
+        transform: translateY(-4px);
+        border-color: #cbd5e1;
     }
     .product-title {
         font-size: 16px;
         font-weight: 700;
-        color: #212121;
-        margin-top: 15px;
-        margin-bottom: 5px;
+        color: #0f172a;
+        margin-top: 12px;
+        margin-bottom: 4px;
+        line-height: 1.3;
     }
     .product-desc {
         font-size: 13px;
-        color: #757575;
+        color: #64748b;
         margin-bottom: 10px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+        min-height: 38px;
     }
     .price-text {
-        color: #2874f0;
+        color: #2563eb;
         font-weight: 800;
-        font-size: 22px;
-        margin-bottom: 15px;
+        font-size: 20px;
+        margin-bottom: 12px;
     }
     .rating-container {
-        font-size: 14px;
-        margin-bottom: 8px;
+        font-size: 13px;
+        margin-bottom: 6px;
     }
-    .stars { color: #f39c12; }
-    .reviews-count { color: #878787; font-size: 12px; }
+    .stars { color: #f59e0b; }
+    .reviews-count { color: #94a3b8; font-size: 12px; }
+    
+    /* Order Status Badges */
+    .status-badge {
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+        display: inline-block;
+    }
+    .status-pending { background-color: #fef3c7; color: #b45309; }
+    .status-confirmed { background-color: #dbeafe; color: #1d4ed8; }
+    .status-dispatched { background-color: #ede9fe; color: #6d28d9; }
+    .status-delivered { background-color: #dcfce7; color: #15803d; }
+    .status-cancelled { background-color: #fee2e2; color: #b91c1c; }
+
+    /* Order Card Container */
+    .order-box {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 16px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    }
     </style>
 """,
     unsafe_allow_html=True,
 )
 
-# --- 3. SUPABASE CONNECTION ---
+# ==============================================================================
+# 3. SUPABASE CONNECTION
+# ==============================================================================
 SUPABASE_URL = st.secrets.get("SUPABASE_URL", "")
 SUPABASE_KEY = st.secrets.get("SUPABASE_KEY", "")
 
 @st.cache_resource
 def init_supabase():
+    if not SUPABASE_URL or not SUPABASE_KEY:
+        st.warning("⚠️ Supabase credentials not found in st.secrets. Using local mock mode.")
+        return None
     return create_client(SUPABASE_URL, SUPABASE_KEY)
 
 try:
     supabase: Client = init_supabase()
 except Exception as e:
     st.error(f"Supabase connection error: {e}")
+    supabase = None
 
-# --- 4. SESSION STATE INITIALIZATION ---
+# ==============================================================================
+# 4. SESSION STATE INITIALIZATION
+# ==============================================================================
 if "page" not in st.session_state:
     st.session_state.page = "🛍️ Product Catalog"
 if "admin_logged_in" not in st.session_state:
@@ -139,58 +183,95 @@ if "cart" not in st.session_state:
     st.session_state.cart = {}
 if "carousel_idx" not in st.session_state:
     st.session_state.carousel_idx = 0
+if "applied_coupon" not in st.session_state:
+    st.session_state.applied_coupon = None
 
-# FETCH PRODUCTS FROM DATABASE WITH LOADING INDICATOR
+# Fetch Products from DB
 if "products" not in st.session_state:
-    with st.spinner("⏳ Fetching premium rugs from our catalog..."):
-        try:
-            response = supabase.table("products").select("*").order("id").execute()
-            st.session_state.products = response.data
-        except Exception as e:
-            st.error("Database connection issue! Unable to load products.")
-            st.session_state.products = []
+    if supabase:
+        with st.spinner("⏳ Fetching premium rugs from Bhadohi catalog..."):
+            try:
+                response = supabase.table("products").select("*").order("id").execute()
+                st.session_state.products = response.data if response.data else []
+            except Exception as e:
+                st.error(f"Database issue: {e}")
+                st.session_state.products = []
+    else:
+        st.session_state.products = [
+            {
+                "id": 1,
+                "name": "Kashmir Royal Silk Persian Rug",
+                "price": 8500,
+                "description": "Authentic hand-knotted pure Mulberry silk rug with traditional floral medallion pattern.",
+                "image_path": "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=600&q=80",
+                "category": "Silk Rugs"
+            },
+            {
+                "id": 2,
+                "name": "Bhadohi Hand-Tufted Wool Carpet",
+                "price": 4200,
+                "description": "Thick, plush 100% New Zealand blend wool carpet. Soft underfoot and durable.",
+                "image_path": "https://images.unsplash.com/photo-1579656381226-5fc0f0100c3b?auto=format&fit=crop&w=600&q=80",
+                "category": "Wool Rugs"
+            },
+            {
+                "id": 3,
+                "name": "Boho Natural Jute & Cotton Dari",
+                "price": 1850,
+                "description": "Eco-friendly natural woven jute runner with geometric fringe accents for living room.",
+                "image_path": "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=600&q=80",
+                "category": "Jute & Dari"
+            }
+        ]
 
-# --- Helper Functions ---
+# ==============================================================================
+# 5. HELPER FUNCTIONS
+# ==============================================================================
 def add_to_cart(prod):
-    prod_id = prod["id"]
+    prod_id = str(prod["id"])
     if prod_id in st.session_state.cart:
         st.session_state.cart[prod_id]["quantity"] += 1
     else:
         st.session_state.cart[prod_id] = {
+            "id": prod["id"],
             "name": prod["name"],
             "price": prod["price"],
+            "image_path": prod.get("image_path", ""),
             "quantity": 1,
         }
 
 def render_product_card(prod, key_prefix=""):
-    # Generate deterministic mock ratings based on product ID
     random.seed(prod["id"])
-    rating = round(random.uniform(4.0, 5.0), 1)
-    reviews = random.randint(25, 400)
+    rating = round(random.uniform(4.2, 5.0), 1)
+    reviews = random.randint(35, 480)
     stars_html = f"<span class='stars'>{'★' * int(rating)}{'☆' * (5 - int(rating))}</span>"
 
     st.markdown("<div class='product-card'>", unsafe_allow_html=True)
     if not prod.get("image_path"):
-        st.warning("📸 No Image Available")
+        st.info("📸 Image Preview Unavailable")
     else:
         try:
             st.image(prod["image_path"], use_container_width=True)
         except Exception:
-            st.error("Image failed to load")
+            st.error("Image loading failed")
+            
     st.markdown(
         f"""
-        <div class='product-title'>{prod['name']}</div>
-        <div class='rating-container'>{stars_html} <span class='reviews-count'>{rating} ({reviews} reviews)</span></div>
-        <div class='product-desc'>{prod['description']}</div>
-        <div class='price-text'>₹{prod['price']}</div>
+        <div>
+            <div class='product-title'>{prod['name']}</div>
+            <div class='rating-container'>{stars_html} <span class='reviews-count'>{rating} ({reviews} reviews)</span></div>
+            <div class='product-desc'>{prod.get('description', 'Handcrafted masterpiece straight from the artisans.')}</div>
+            <div class='price-text'>₹{prod['price']:,}</div>
+        </div>
     """,
         unsafe_allow_html=True,
     )
+    
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
         if st.button("Cart 🛒", key=f"add_{key_prefix}_{prod['id']}", use_container_width=True):
             add_to_cart(prod)
-            st.toast("🛒 Added to Cart!")
+            st.toast(f"🛒 Added '{prod['name'][:20]}...' to cart!")
     with btn_col2:
         if st.button("Buy ⚡", key=f"buy_{key_prefix}_{prod['id']}", use_container_width=True, type="primary"):
             add_to_cart(prod)
@@ -198,71 +279,90 @@ def render_product_card(prod, key_prefix=""):
             st.rerun()
     st.markdown("</div>", unsafe_allow_html=True)
 
+def render_status_badge(status):
+    status_map = {
+        "Pending": ("status-pending", "⏳ Pending Payment / Verification"),
+        "Paid / Confirmed": ("status-confirmed", "✅ Payment Verified & Order Confirmed"),
+        "Dispatched": ("status-dispatched", "🚚 In Transit (Dispatched)"),
+        "Delivered": ("status-delivered", "🎉 Delivered Successfully"),
+        "Cancelled": ("status-cancelled", "❌ Cancelled"),
+    }
+    css_class, label = status_map.get(status, ("status-pending", status))
+    return f"<span class='status-badge {css_class}'>{label}</span>"
 
-# --- 5. TOP NAVIGATION BAR ---
-nav_col1, nav_col2, nav_col3, nav_col4 = st.columns([3, 1, 1, 1])
+# ==============================================================================
+# 6. TOP NAVIGATION BAR
+# ==============================================================================
+nav_col1, nav_col2, nav_col3, nav_col4, nav_col5 = st.columns([3.5, 1.2, 1.2, 1.2, 1.2])
+
 with nav_col1:
     st.markdown("""
         <div class='brand-title'>
-            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg" width="45" height="45" style="border-radius: 8px; margin-right: 12px;"> 
+            <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/WhatsApp%20Image%202026-07-31%20at%202.45.21%20PM.jpeg" width="42" height="42" style="border-radius: 8px; margin-right: 12px; object-fit: cover;"> 
             SM Carpet City
         </div>
     """, unsafe_allow_html=True)
+
 with nav_col2:
+    if st.button("🏠 Catalog", use_container_width=True):
+        st.session_state.page = "🛍️ Product Catalog"
+        st.rerun()
+
+with nav_col3:
+    if st.button("📦 Track Order", use_container_width=True):
+        st.session_state.page = "📦 Track Order"
+        st.rerun()
+
+with nav_col4:
+    cart_count = sum(item["quantity"] for item in st.session_state.cart.values())
+    if st.button(f"🛒 Cart ({cart_count})", use_container_width=True, type="primary"):
+        st.session_state.page = "🛒 Shopping Cart & Checkout"
+        st.rerun()
+
+with nav_col5:
     if st.button("⚙️ Admin", use_container_width=True):
         st.session_state.page = "⚙️ Admin Panel"
         st.rerun()
-with nav_col3:
-    if st.button("🏠 Home", use_container_width=True):
-        st.session_state.page = "🛍️ Product Catalog"
-        st.rerun()
-with nav_col4:
-    cart_items = sum(item["quantity"] for item in st.session_state.cart.values())
-    if st.button(f"🛒 Cart ({cart_items})", use_container_width=True, type="primary"):
-        st.session_state.page = "🛒 Shopping Cart & Checkout"
-        st.rerun()
-st.markdown("---")
 
-# --- 6. SIDEBAR NAVIGATION ---
-st.sidebar.markdown("### ⚙️ Quick Links")
-if st.sidebar.button("Admin Panel (Add Rug)", use_container_width=True):
-    st.session_state.page = "⚙️ Admin Panel"
-    st.rerun()
+st.markdown("<hr style='margin-top: 5px; margin-bottom: 20px; border: 0; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
-# --- 7. FLOATING WHATSAPP BUTTON ---
+# ==============================================================================
+# 7. FLOATING WHATSAPP BUTTON
+# ==============================================================================
 YOUR_WHATSAPP_NUMBER = "918009076300"
-wa_link = f"https://wa.me/{YOUR_WHATSAPP_NUMBER}?text=Hello,%20I%20want%20to%20know%20more%20about%20your%20carpets!"
+wa_link = f"https://wa.me/{YOUR_WHATSAPP_NUMBER}?text=Hello%20SM%20Carpet%20City,%20I%20am%20interested%20in%20your%20carpets%20catalog!"
 st.markdown(
     f"""
     <style>
     .floating-wa-button {{
         position: fixed;
-        bottom: 80px;
-        right: 20px;
+        bottom: 30px;
+        right: 25px;
         z-index: 999999;
     }}
     .wa-btn {{
         background-color: #25D366;
         color: white;
         border: none;
-        padding: 15px;
-        border-radius: 50px;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        padding: 14px;
+        border-radius: 50%;
+        box-shadow: 0 6px 16px rgba(37, 211, 102, 0.4);
         cursor: pointer;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: transform 0.3s;
+        transition: all 0.3s ease;
     }}
     .wa-btn:hover {{
-        transform: scale(1.1);
+        transform: scale(1.12);
+        box-shadow: 0 8px 24px rgba(37, 211, 102, 0.6);
     }}
     </style>
     
     <div class="floating-wa-button">
         <a href="{wa_link}" target="_blank">
-            <button class="wa-btn">
-                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="30">
+            <button class="wa-btn" title="Chat on WhatsApp">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" width="32" height="32" alt="WhatsApp">
             </button>
         </a>
     </div>
@@ -270,197 +370,350 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# --- PAGE 1: PRODUCT CATALOG ---
+# ==============================================================================
+# PAGE 1: PRODUCT CATALOG
+# ==============================================================================
 if st.session_state.page == "🛍️ Product Catalog":
     if not st.session_state.products:
-        st.info("No products found in the database. Please check back later!")
+        st.info("No carpets currently available. Please check back shortly or contact us on WhatsApp!")
     else:
-        # --- FEATURED PRODUCTS CAROUSEL ---
-        st.markdown("### 🌟 Featured Collections")
-        featured_products = st.session_state.products[:5]  # Taking top 5 as featured
+        # Featured Collections Carousel
+        st.markdown("### 🌟 Handpicked Artisan Highlights")
+        featured = st.session_state.products[:6]
         
-        if len(featured_products) > 0:
-            c_prev, c_cards, c_next = st.columns([1, 10, 1], gap="small")
-            
+        if len(featured) > 0:
+            c_prev, c_cards, c_next = st.columns([0.6, 10, 0.6])
             with c_prev:
-                st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
                 if st.button("◀", key="prev_btn", use_container_width=True):
-                    st.session_state.carousel_idx = (st.session_state.carousel_idx - 1) % len(featured_products)
-                    
+                    st.session_state.carousel_idx = (st.session_state.carousel_idx - 1) % len(featured)
+                    st.rerun()
             with c_cards:
-                display_qty = min(3, len(featured_products))
+                display_qty = min(3, len(featured))
                 f_cols = st.columns(display_qty)
                 for i in range(display_qty):
-                    prod_idx = (st.session_state.carousel_idx + i) % len(featured_products)
+                    prod_idx = (st.session_state.carousel_idx + i) % len(featured)
                     with f_cols[i]:
-                        render_product_card(featured_products[prod_idx], key_prefix=f"feat_{prod_idx}")
-                        
+                        render_product_card(featured[prod_idx], key_prefix=f"feat_{prod_idx}")
             with c_next:
-                st.markdown("<br><br><br><br><br>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
                 if st.button("▶", key="next_btn", use_container_width=True):
-                    st.session_state.carousel_idx = (st.session_state.carousel_idx + 1) % len(featured_products)
+                    st.session_state.carousel_idx = (st.session_state.carousel_idx + 1) % len(featured)
+                    st.rerun()
+
+        st.markdown("<hr style='margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
+
+        # Search, Category Filter, and Price Slider
+        st.markdown("### 🏷️ Explore All Rugs & Dari Collections")
+        f_col1, f_col2, f_col3 = st.columns([2.5, 1.5, 1.5])
         
-        st.markdown("---")
-        
-        # --- SEARCH & FILTER BAR ---
-        col_search, col_filter = st.columns([3, 1])
-        with col_search:
-            search_query = st.text_input("🔍 Search our catalog by name or description...", placeholder="e.g. Persian, Silk, Floral...")
-        with col_filter:
-            sort_by = st.selectbox("Sort By", ["Relevance", "Price: Low to High", "Price: High to Low"])
+        with f_col1:
+            search_query = st.text_input("🔍 Search by rug name, style, or material...", placeholder="e.g. Persian, Silk, Wool, Kashmiri, Floral")
             
-        # Filter and Sort Logic
+        with f_col2:
+            sort_by = st.selectbox("Sort Order", ["Featured", "Price: Low to High", "Price: High to Low"])
+
+        with f_col3:
+            prices = [p["price"] for p in st.session_state.products if "price" in p and isinstance(p["price"], (int, float))]
+            max_p = max(prices) if prices else 10000
+            price_limit = st.slider("Max Budget (₹)", min_value=500, max_value=int(max_p), value=int(max_p), step=500)
+
+        # Filter Logic
         filtered_prods = [
             p for p in st.session_state.products 
-            if search_query.lower() in p['name'].lower() or search_query.lower() in p['description'].lower()
+            if (search_query.lower() in p.get('name', '').lower() or search_query.lower() in p.get('description', '').lower())
+            and p.get('price', 0) <= price_limit
         ]
-        
-        if sort_by == "Price: Low to High":
-            filtered_prods = sorted(filtered_prods, key=lambda x: x['price'])
-        elif sort_by == "Price: High to Low":
-            filtered_prods = sorted(filtered_prods, key=lambda x: x['price'], reverse=True)
 
-        st.markdown("### 🏷️ All Products")
+        if sort_by == "Price: Low to High":
+            filtered_prods = sorted(filtered_prods, key=lambda x: x.get('price', 0))
+        elif sort_by == "Price: High to Low":
+            filtered_prods = sorted(filtered_prods, key=lambda x: x.get('price', 0), reverse=True)
+
         if not filtered_prods:
-            st.warning("No products matched your search. Try different keywords.")
+            st.warning("No carpets match your filter criteria. Try expanding your budget or search query.")
         else:
+            st.caption(f"Showing **{len(filtered_prods)}** handpicked carpets")
             cols = st.columns(3)
             for idx, prod in enumerate(filtered_prods):
                 with cols[idx % 3]:
-                    render_product_card(prod, key_prefix="all")
+                    render_product_card(prod, key_prefix="catalog")
 
-# --- PAGE 2: CART & CHECKOUT ---
+# ==============================================================================
+# PAGE 2: ORDER TRACKING (NEW FEATURE)
+# ==============================================================================
+elif st.session_state.page == "📦 Track Order":
+    st.markdown("## 📦 Track Your Order Status")
+    st.markdown("Enter your registered **Mobile Number** or **Order ID** to view live dispatch and delivery updates.")
+    
+    t_col1, t_col2 = st.columns([3, 1])
+    with t_col1:
+        track_input = st.text_input("Enter 10-Digit Mobile Number or Order ID", placeholder="e.g. 9876543210 or 1024")
+    with t_col2:
+        st.markdown("<br>", unsafe_allow_html=True)
+        search_track = st.button("Search Order 🔎", type="primary", use_container_width=True)
+
+    if track_input or search_track:
+        if supabase:
+            with st.spinner("Searching records..."):
+                query = supabase.table("orders").select("*")
+                if track_input.isdigit() and len(track_input) <= 6:
+                    query = query.eq("id", int(track_input))
+                else:
+                    query = query.eq("phone", track_input.strip())
+                
+                res = query.order("id", desc=True).execute()
+                orders = res.data if res.data else []
+        else:
+            orders = [
+                {
+                    "id": 1042,
+                    "customer_name": "Rajesh Kumar",
+                    "phone": track_input,
+                    "address": "B-42 Sector 5, Carpet City",
+                    "pincode": "221314",
+                    "total_amount": 8500,
+                    "payment_status": "Dispatched",
+                    "created_at": "2026-08-16T11:20:00"
+                }
+            ]
+
+        if orders:
+            st.markdown(f"#### Found **{len(orders)}** matching order(s):")
+            for ord_data in orders:
+                st.markdown(f"""
+                    <div class='order-box'>
+                        <div style='display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 10px; margin-bottom: 12px;'>
+                            <div>
+                                <b style='font-size: 18px; color: #0f172a;'>Order #{ord_data.get('id')}</b>
+                                <span style='color: #64748b; font-size: 13px; margin-left: 10px;'>Recipient: {ord_data.get('customer_name')}</span>
+                            </div>
+                            <div>
+                                {render_status_badge(ord_data.get('payment_status', 'Pending'))}
+                            </div>
+                        </div>
+                        <div style='display: flex; justify-content: space-between; flex-wrap: wrap; font-size: 14px;'>
+                            <div>
+                                📍 <b>Delivery Address:</b> {ord_data.get('address')}, PIN: <b>{ord_data.get('pincode')}</b><br>
+                                📞 <b>Phone:</b> {ord_data.get('phone')}
+                            </div>
+                            <div style='text-align: right;'>
+                                💰 <b>Total Bill:</b> <span style='color:#2563eb; font-weight:800; font-size:16px;'>₹{ord_data.get('total_amount', 0):,}</span>
+                            </div>
+                        </div>
+                    </div>
+                """, unsafe_allow_html=True)
+        else:
+            st.warning("No orders found matching your input. Please check the mobile number or contact support.")
+
+# ==============================================================================
+# PAGE 3: SHOPPING CART & CHECKOUT
+# ==============================================================================
 elif st.session_state.page == "🛒 Shopping Cart & Checkout":
     if "order_ready" in st.session_state:
-        st.success(f"✅ Order Confirmed for {st.session_state.order_ready['name']}! Delivery details saved.")
+        order_info = st.session_state.order_ready
+        st.success(f"🎉 Order Registered for **{order_info['name']}**! (Order #{order_info.get('order_id', 'Pending')})")
+        
         YOUR_UPI_ID = "maheshsing221314-3@okaxis"
-        YOUR_NAME = "MAHESH MAURYA"
-        tn_note = quote(f"Order for {st.session_state.order_ready['name']}")
+        YOUR_NAME = "SM CARPET CITY"
+        tn_note = quote(f"Order {order_info.get('order_id', '')} - {order_info['name']}")
         pn_name = quote(YOUR_NAME)
-        upi_url = f"upi://pay?pa={YOUR_UPI_ID}&pn={pn_name}&am={st.session_state.order_ready['amount']}&cu=INR&tn={tn_note}"
+        upi_url = f"upi://pay?pa={YOUR_UPI_ID}&pn={pn_name}&am={order_info['amount']}&cu=INR&tn={tn_note}"
         
-        st.markdown("### 📱 Complete Your Payment")
-        st.info(f"Amount to Pay: **₹{st.session_state.order_ready['amount']}**")
+        st.markdown("### 📱 Complete Your UPI Payment")
+        st.info(f"Payable Amount: **₹{order_info['amount']:,}** (Free Insured Delivery Included)")
         
-        col_qr, col_btn = st.columns([1, 2])
+        col_qr, col_pay_actions = st.columns([1, 1.8], gap="large")
         with col_qr:
-            qr = qrcode.QRCode(version=1, box_size=10, border=4)
+            qr = qrcode.QRCode(version=1, box_size=8, border=3)
             qr.add_data(upi_url)
             qr.make(fit=True)
-            img = qr.make_image(fill_color="black", back_color="white")
+            img = qr.make_image(fill_color="#0f172a", back_color="white")
             buf = io.BytesIO()
             img.save(buf, format="PNG")
-            byte_im = buf.getvalue()
-            st.image(byte_im, width=200, caption="Scan via PhonePe, GPay, Paytm")
-        with col_btn:
-            st.markdown("<br>", unsafe_allow_html=True)
+            st.image(buf.getvalue(), width=220, caption="Scan with GPay / PhonePe / Paytm")
+            
+        with col_pay_actions:
             st.markdown(
-                f'<a href="{upi_url}" target="_blank"><button style="background-color:#2874f0; color:white; padding:15px 24px; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:bold; width:100%; font-family:\'Poppins\', sans-serif;">Pay via UPI App (Click Here) 🚀</button></a>',
+                f'<a href="{upi_url}" target="_blank"><button style="background-color:#2563eb; color:white; padding:14px 20px; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:700; width:100%; margin-bottom:12px;">⚡ Open in UPI App (GPay / PhonePe / Paytm)</button></a>',
                 unsafe_allow_html=True,
             )
-            st.markdown("<p style='text-align:center; font-size:14px; margin-top:8px;'>Click above if paying directly from a mobile device.</p>", unsafe_allow_html=True)
-            st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("Shop More 🛍️", use_container_width=True):
+            
+            # WhatsApp confirmation share link
+            wa_order_text = quote(
+                f"Hello SM Carpet City, I have placed Order #{order_info.get('order_id')} for ₹{order_info['amount']}.\nName: {order_info['name']}\nPhone: {order_info['phone']}\nAddress: {order_info['address']}, {order_info['pincode']}"
+            )
+            wa_confirm_url = f"https://wa.me/{YOUR_WHATSAPP_NUMBER}?text={wa_order_text}"
+            
+            st.markdown(
+                f'<a href="{wa_confirm_url}" target="_blank"><button style="background-color:#16a34a; color:white; padding:12px 20px; border:none; border-radius:8px; font-size:15px; cursor:pointer; font-weight:600; width:100%;">💬 Share Receipt on WhatsApp</button></a>',
+                unsafe_allow_html=True,
+            )
+            
+            st.markdown("---")
+            st.markdown("##### 📝 Payment Verification (UTR / Reference No.)")
+            with st.form("utr_form"):
+                utr_num = st.text_input("Enter 12-Digit UPI Transaction ID / UTR:", placeholder="e.g. 423589123456")
+                submit_utr = st.form_submit_button("Confirm Payment Done ✅", type="primary")
+                if submit_utr:
+                    if len(utr_num.strip()) < 6:
+                        st.error("Please enter a valid reference / UTR number.")
+                    else:
+                        if supabase and order_info.get("order_id"):
+                            try:
+                                supabase.table("orders").update({
+                                    "payment_status": f"Paid / Confirmed (UTR: {utr_num})",
+                                    "home_address": f"UTR: {utr_num}"
+                                }).eq("id", order_info["order_id"]).execute()
+                                st.success("Thank you! Payment Reference submitted. We will dispatch your rug soon.")
+                            except Exception as e:
+                                st.error(f"Error submitting UTR: {e}")
+                        else:
+                            st.success("UTR Reference submitted!")
+
+            if st.button("← Back to Product Catalog", use_container_width=True):
                 del st.session_state.order_ready
                 st.session_state.page = "🛍️ Product Catalog"
                 st.rerun()
+
     elif not st.session_state.cart:
-        st.info("Your Cart is Empty. Please add items from the Product Catalog.")
+        st.info("🛒 Your cart is currently empty. Explore our catalog and add your favorite rugs!")
+        if st.button("Explore Catalog 🛍️", type="primary"):
+            st.session_state.page = "🛍️ Product Catalog"
+            st.rerun()
     else:
-        col_cart, col_summary = st.columns([2, 1])
-        total_amount = 0
+        col_cart, col_summary = st.columns([1.6, 1.2], gap="large")
+        subtotal = 0
         with col_cart:
-            st.markdown("### 🛒 My Cart")
+            st.markdown("### 🛒 Your Shopping Bag")
             for p_id, item in list(st.session_state.cart.items()):
-                c1, c2, c3, c4 = st.columns([3, 1, 1, 1])
+                c1, c2, c3, c4 = st.columns([3, 1.2, 1.2, 0.8])
                 c1.write(f"**{item['name']}**")
-                c2.write(f"₹{item['price']}")
+                c2.write(f"₹{item['price']:,}")
                 new_qty = c3.number_input(
-                    "Qty", min_value=1, value=item["quantity"], key=f"qty_{p_id}", label_visibility="collapsed"
+                    "Qty", min_value=1, max_value=20, value=item["quantity"], key=f"qty_{p_id}", label_visibility="collapsed"
                 )
                 st.session_state.cart[p_id]["quantity"] = new_qty
-                total_amount += item["price"] * new_qty
+                subtotal += item["price"] * new_qty
                 if c4.button("🗑️", key=f"rem_{p_id}"):
                     del st.session_state.cart[p_id]
                     st.rerun()
+            
             st.markdown("---")
-            st.markdown(f"#### **Total Amount: <span style='color:#2874f0;'>₹{total_amount}</span>**", unsafe_allow_html=True)
+            
+            # Coupon / Discount Code Feature
+            st.markdown("##### 🎟️ Have a Promo / Coupon Code?")
+            coup_col1, coup_col2 = st.columns([2, 1])
+            with coup_col1:
+                coupon_input = st.text_input("Coupon Code", placeholder="e.g. CARPET10, BHADOHI500", label_visibility="collapsed")
+            with coup_col2:
+                if st.button("Apply", use_container_width=True):
+                    code = coupon_input.strip().upper()
+                    if code == "CARPET10":
+                        st.session_state.applied_coupon = {"code": "CARPET10", "type": "pct", "val": 10}
+                        st.success("10% Discount applied!")
+                        st.rerun()
+                    elif code == "BHADOHI500":
+                        st.session_state.applied_coupon = {"code": "BHADOHI500", "type": "flat", "val": 500}
+                        st.success("₹500 Discount applied!")
+                        st.rerun()
+                    else:
+                        st.error("Invalid Promo Code")
+
+            discount_amt = 0
+            if st.session_state.applied_coupon:
+                coup = st.session_state.applied_coupon
+                if coup["type"] == "pct":
+                    discount_amt = int(subtotal * (coup["val"] / 100))
+                else:
+                    discount_amt = min(subtotal, coup["val"])
+                st.info(f"✨ Promo `{coup['code']}` applied: -₹{discount_amt:,} saving!")
+
+            final_total = max(0, subtotal - discount_amt)
+            st.markdown(f"#### Total Payable: <span style='color:#2563eb;'>₹{final_total:,}</span>", unsafe_allow_html=True)
             
         with col_summary:
-            st.markdown("### 🚚 Delivery Details")
+            st.markdown("### 🚚 Delivery & Contact Details")
             with st.form("checkout_form"):
-                customer_name = st.text_input("Full Name *", placeholder="Enter Your Name")
-                phone = st.text_input("Mobile Number *", placeholder="Enter Your 10 Digit Phone Number")
+                customer_name = st.text_input("Full Name *", placeholder="e.g. Ramesh Maurya")
+                phone = st.text_input("Mobile Number *", placeholder="10-digit mobile number")
                 address = st.text_area(
-                    "Full Delivery Address *",
-                    placeholder="House/Flat No., Building Name, Street, Landmark, City...",
-                    height=100,
+                    "Delivery Address *",
+                    placeholder="House/Plot No., Street, Landmark, City...",
+                    height=90,
                 )
-                pincode = st.text_input("PIN Code *", max_chars=6, placeholder="Enter Your 4 Digit PinCode")
+                pincode = st.text_input("PIN Code *", max_chars=6, placeholder="6-digit Postal PIN")
                 
-                submit_order = st.form_submit_button("Proceed to Pay 🚀", type="primary", use_container_width=True)
+                submit_order = st.form_submit_button("Proceed to Pay (UPI) 🚀", type="primary", use_container_width=True)
                 if submit_order:
                     if not customer_name or not phone or not address or not pincode:
-                        st.error("Please fill all required fields!")
+                        st.error("⚠️ Please fill in all mandatory fields!")
                     elif not phone.isdigit() or len(phone) != 10:
-                        st.error("Please enter a valid 10-digit phone number")
+                        st.error("⚠️ Enter a valid 10-digit mobile number.")
                     elif not pincode.isdigit() or len(pincode) != 6:
-                        st.error("Please enter a valid 6-digit PIN Code")
+                        st.error("⚠️ Enter a valid 6-digit postal PIN Code.")
                     else:
                         order_data = {
                             "customer_name": customer_name,
                             "phone": phone,
                             "address": address,
-                            "home_address": "N/A",
+                            "home_address": f"Promo: {st.session_state.applied_coupon['code']}" if st.session_state.applied_coupon else "None",
                             "pincode": pincode,
-                            "total_amount": int(total_amount),
+                            "total_amount": int(final_total),
                             "payment_status": "Pending",
                         }
                         try:
-                            with st.spinner("🔒 Securing connection & generating your order..."):
-                                time.sleep(1.5)
-                                supabase.table("orders").insert(order_data).execute()
+                            with st.spinner("Creating your order securely..."):
+                                time.sleep(1)
+                                order_id = None
+                                if supabase:
+                                    res = supabase.table("orders").insert(order_data).execute()
+                                    if res.data and len(res.data) > 0:
+                                        order_id = res.data[0].get("id")
+                                
                                 st.session_state.order_ready = {
+                                    "order_id": order_id if order_id else random.randint(1000, 9999),
                                     "name": customer_name,
-                                    "amount": total_amount,
+                                    "amount": final_total,
                                     "phone": phone,
                                     "address": address,
                                     "pincode": pincode,
                                 }
                                 st.session_state.cart = {}
-                            st.toast("📦 Order initialized successfully!", icon="🚀")
+                                st.session_state.applied_coupon = None
                             st.rerun()
                         except Exception as e:
-                            st.error(f"Failed to save order in Database: {e}")
+                            st.error(f"Order placement error: {e}")
 
-# --- PAGE 3: ADMIN PANEL ---
+# ==============================================================================
+# PAGE 4: ADMIN DASHBOARD (IMPROVED WITH 4 POWERFUL TABS)
+# ==============================================================================
 elif st.session_state.page == "⚙️ Admin Panel":
     if not st.session_state.admin_logged_in:
         st.markdown(
             """
             <style>
             .stApp {
-                background-color: #0d0d0d !important;
-                background-image: radial-gradient(circle at 50% 50%, #1a1a1a 0%, #000000 100%);
-                color: #00ffcc !important;
+                background-color: #0b0f19 !important;
+                color: #38bdf8 !important;
             }
             .cyber-box {
-                background: rgba(10, 25, 47, 0.8);
-                border: 2px solid #00ffcc;
-                box-shadow: 0 0 15px #00ffcc, inset 0 0 10px #00ffcc;
-                border-radius: 12px;
+                background: rgba(15, 23, 42, 0.9);
+                border: 2px solid #38bdf8;
+                box-shadow: 0 0 25px rgba(56, 189, 248, 0.25);
+                border-radius: 14px;
                 padding: 40px;
-                max-width: 450px;
+                max-width: 440px;
                 margin: auto;
                 text-align: center;
-                margin-top: 50px;
+                margin-top: 40px;
             }
             .cyber-title {
-                color: #ff007f;
+                color: #f43f5e;
                 font-family: 'Courier New', Courier, monospace;
-                font-size: 30px;
-                font-weight: bold;
-                text-shadow: 0 0 10px #ff007f;
+                font-size: 26px;
+                font-weight: 800;
+                letter-spacing: 2px;
                 margin-bottom: 20px;
             }
             </style>
@@ -468,109 +721,220 @@ elif st.session_state.page == "⚙️ Admin Panel":
             unsafe_allow_html=True,
         )
         st.markdown("<div class='cyber-box'>", unsafe_allow_html=True)
-        st.markdown("<div class='cyber-title'>[ SYSTEM_ACCESS ]</div>", unsafe_allow_html=True)
-        admin_user = st.text_input("USER ID", placeholder="Enter Username")
-        admin_pass = st.text_input("PASSWORD", type="password", placeholder="Enter Password")
+        st.markdown("<div class='cyber-title'>[ ADMIN MAINFRAME ]</div>", unsafe_allow_html=True)
+        admin_user = st.text_input("USER ID", placeholder="Admin username")
+        admin_pass = st.text_input("PASSWORD", type="password", placeholder="Password")
         st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("INITIALIZE LOGIN ⚡", use_container_width=True, type="primary"):
+        
+        if st.button("AUTHENTICATE ACCESS ⚡", use_container_width=True, type="primary"):
             if admin_user and admin_pass:
-                with st.spinner("Authenticating..."):
-                    try:
-                        response = (
-                            supabase.table("admins")
-                            .select("*")
-                            .eq("username", admin_user)
-                            .eq("password", admin_pass)
-                            .execute()
-                        )
-                        if len(response.data) > 0:
+                with st.spinner("Verifying credentials..."):
+                    if supabase:
+                        try:
+                            response = (
+                                supabase.table("admins")
+                                .select("*")
+                                .eq("username", admin_user)
+                                .eq("password", admin_pass)
+                                .execute()
+                            )
+                            if response.data and len(response.data) > 0:
+                                st.session_state.admin_logged_in = True
+                                st.success("ACCESS GRANTED.")
+                                time.sleep(0.8)
+                                st.rerun()
+                            else:
+                                st.error("ACCESS DENIED: Incorrect credentials.")
+                        except Exception as e:
+                            st.error(f"Auth database connection failed: {e}")
+                    else:
+                        # Fallback Demo Auth
+                        if admin_user == "admin" and admin_pass == "admin123":
                             st.session_state.admin_logged_in = True
-                            st.success("ACCESS GRANTED. Welcome to Mainframe.")
-                            time.sleep(1)
                             st.rerun()
                         else:
-                            st.error("ACCESS DENIED: Invalid Credentials!")
-                    except Exception as e:
-                        st.error(f"SYSTEM ERROR: Could not connect to Auth Database. {e}")
+                            st.error("Invalid credentials (demo: admin / admin123)")
             else:
-                st.warning("Please provide complete credentials.")
+                st.warning("Please fill in both fields.")
         st.markdown("</div>", unsafe_allow_html=True)
     else:
-        st.markdown(
-            """
-            <style>
-            .stApp { background-color: #f4f6f9 !important; color: #2b2b2b !important; }
-            [data-testid="stForm"] {
-                background-color: #ffffff;
-                border-radius: 12px;
-                padding: 30px;
-                box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.05);
-                border: 1px solid #eaeaea;
-            }
-            </style>
-        """,
-            unsafe_allow_html=True,
-        )
+        # Admin Header
         col1, col2 = st.columns([4, 1])
         with col1:
-            st.markdown("## ⚙️ Admin Dashboard")
-            st.markdown("<p style='color: #666; margin-top: -15px;'>Manage your Dari/Rug catalog efficiently.</p>", unsafe_allow_html=True)
+            st.markdown("## ⚙️ Executive Admin Dashboard")
+            st.caption("Manage incoming orders, catalog items, and track revenue KPIs.")
         with col2:
             if st.button("Logout 🔴", use_container_width=True):
                 st.session_state.admin_logged_in = False
                 st.rerun()
-        st.divider()
-        with st.form("add_product_form", clear_on_submit=True):
-            st.markdown("### ✨ Add New Product")
-            st.markdown("<br>", unsafe_allow_html=True)
-            row1_col1, row1_col2 = st.columns(2)
-            with row1_col1:
-                new_name = st.text_input("Dari / Rug Name *", placeholder="e.g., Persian Floral Silk Rug")
-            with row1_col2:
-                new_price = st.number_input("Price (₹) *", min_value=0, value=None, placeholder="e.g., 2500")
-            
-            new_img_path = st.text_input(
-                "Image File Path or URL",
-                placeholder="https://your-supabase.com/.../rug-image.jpg",
-                help="Paste the direct URL of the image uploaded to your Supabase storage.",
-            )
-            new_desc = st.text_area("Product Description", placeholder="Briefly describe material, colors, dimensions...", height=120)
-            
-            st.markdown("<br>", unsafe_allow_html=True)
-            submit_new_prod = st.form_submit_button("➕ Add Product to Catalog", type="primary")
-            
-            if submit_new_prod:
-                if not new_name or new_price is None:
-                    st.warning("⚠️ Please fill in all mandatory fields (Name and Price)!")
-                else:
-                    with st.spinner("Adding product to database..."):
-                        try:
-                            product_data = {
-                                "name": new_name,
-                                "price": int(new_price),
-                                "description": new_desc,
-                                "image_path": new_img_path,
-                            }
-                            supabase.table("products").insert(product_data).execute()
-                            st.success(f"✅ Successfully added **{new_name}** to your catalog!")
-                            
-                            # Trigger re-fetch for products next run
-                            if "products" in st.session_state:
-                                del st.session_state.products 
-                            st.balloons()
-                        except Exception as e:
-                            st.error(f"❌ Error adding product to Database: {e}")
 
-# --- 8. FOOTER RENDER (WITH POLISHED PAYMENT ICONS) ---
+        st.markdown("---")
+
+        tab_orders, tab_add, tab_catalog, tab_analytics = st.tabs([
+            "📦 Manage Orders", "➕ Add Product", "🏷️ Edit Catalog", "📊 Sales Analytics"
+        ])
+
+        # TAB 1: ORDER MANAGEMENT
+        with tab_orders:
+            st.markdown("### Customer Orders & Status Dispatcher")
+            if supabase:
+                try:
+                    orders_res = supabase.table("orders").select("*").order("id", desc=True).limit(50).execute()
+                    orders_list = orders_res.data if orders_res.data else []
+                except Exception as e:
+                    st.error(f"Could not load orders: {e}")
+                    orders_list = []
+            else:
+                orders_list = []
+
+            if not orders_list:
+                st.info("No customer orders recorded yet.")
+            else:
+                for ord in orders_list:
+                    with st.expander(f"Order #{ord.get('id')} — {ord.get('customer_name')} | ₹{ord.get('total_amount', 0):,} | {ord.get('payment_status', 'Pending')}"):
+                        o_col1, o_col2 = st.columns([2, 1.2])
+                        with o_col1:
+                            st.write(f"👤 **Customer:** {ord.get('customer_name')}")
+                            st.write(f"📞 **Phone:** {ord.get('phone')}")
+                            st.write(f"📍 **Address:** {ord.get('address')}, PIN: {ord.get('pincode')}")
+                            st.write(f"💳 **Amount:** ₹{ord.get('total_amount', 0):,}")
+                            st.write(f"ℹ️ **Notes / UTR Info:** {ord.get('home_address', 'None')}")
+                            
+                            # Contact Customer on WhatsApp
+                            c_phone = ord.get('phone', '')
+                            wa_cust_link = f"https://wa.me/91{c_phone}?text=Hello%20{quote(str(ord.get('customer_name')))},%20update%20regarding%20your%20Carpet%20Order%20%23{ord.get('id')}:"
+                            st.markdown(f"[💬 Message Customer on WhatsApp]({wa_cust_link})")
+
+                        with o_col2:
+                            current_stat = ord.get("payment_status", "Pending")
+                            stat_options = ["Pending", "Paid / Confirmed", "Dispatched", "Delivered", "Cancelled"]
+                            cur_index = stat_options.index(current_stat) if current_stat in stat_options else 0
+                            
+                            new_stat = st.selectbox(
+                                "Update Status:", stat_options, index=cur_index, key=f"stat_sel_{ord.get('id')}"
+                            )
+                            if st.button("Save Status Update 💾", key=f"btn_stat_{ord.get('id')}", type="primary"):
+                                if supabase:
+                                    supabase.table("orders").update({"payment_status": new_stat}).eq("id", ord.get("id")).execute()
+                                    st.success(f"Order #{ord.get('id')} updated to '{new_stat}'")
+                                    st.rerun()
+
+        # TAB 2: ADD NEW PRODUCT (WITH DIRECT STORAGE UPLOADER)
+        with tab_add:
+            st.markdown("### ✨ Add New Rug to Catalog")
+            with st.form("add_product_form", clear_on_submit=True):
+                p_col1, p_col2 = st.columns(2)
+                with p_col1:
+                    new_name = st.text_input("Carpet / Rug Title *", placeholder="e.g. Persian Medallion Hand-Knotted Silk Rug")
+                with p_col2:
+                    new_price = st.number_input("Price in INR (₹) *", min_value=100, step=500, value=2500)
+                
+                # Image options: File upload or URL
+                img_col1, img_col2 = st.columns(2)
+                with img_col1:
+                    uploaded_img = st.file_uploader("Upload Image directly (JPG/PNG)", type=["jpg", "jpeg", "png", "webp"])
+                with img_col2:
+                    new_img_url = st.text_input("Or Paste Supabase / External Image URL", placeholder="https://...")
+                
+                new_desc = st.text_area("Product Description & Specs", placeholder="Knot count, weave type, dimensions (e.g. 5x8 ft), color palette...", height=100)
+                
+                submit_new_prod = st.form_submit_button("➕ Publish to Catalog", type="primary")
+                if submit_new_prod:
+                    if not new_name or not new_price:
+                        st.warning("Please specify both product title and price.")
+                    else:
+                        final_img_path = new_img_url
+                        # If file uploaded, attempt to save to Supabase Storage
+                        if uploaded_img is not None and supabase:
+                            try:
+                                file_bytes = uploaded_img.read()
+                                file_name = f"rug_{int(time.time())}_{uploaded_img.name}"
+                                supabase.storage.from_("image").upload(file_name, file_bytes)
+                                final_img_path = supabase.storage.from_("image").get_public_url(file_name)
+                            except Exception as e:
+                                st.error(f"Image storage upload warning: {e}")
+                        
+                        if not final_img_path:
+                            final_img_path = "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=600&q=80"
+
+                        prod_payload = {
+                            "name": new_name,
+                            "price": int(new_price),
+                            "description": new_desc,
+                            "image_path": final_img_path,
+                        }
+                        if supabase:
+                            try:
+                                supabase.table("products").insert(prod_payload).execute()
+                                st.success(f"✅ Successfully added **{new_name}** to the catalog!")
+                                if "products" in st.session_state:
+                                    del st.session_state.products
+                                st.balloons()
+                            except Exception as e:
+                                st.error(f"Database error: {e}")
+                        else:
+                            st.success(f"Demo Mode: Added {new_name}!")
+
+        # TAB 3: EDIT / DELETE PRODUCTS
+        with tab_catalog:
+            st.markdown("### 🏷️ Manage Catalog Items")
+            if "products" in st.session_state and st.session_state.products:
+                for p in st.session_state.products:
+                    with st.expander(f"ID #{p.get('id')} — {p.get('name')} (₹{p.get('price', 0):,})"):
+                        e_c1, e_c2, e_c3 = st.columns([1.5, 3, 1])
+                        with e_c1:
+                            if p.get("image_path"):
+                                st.image(p["image_path"], width=120)
+                        with e_c2:
+                            st.write(f"**Name:** {p.get('name')}")
+                            st.write(f"**Description:** {p.get('description')}")
+                            st.write(f"**Current Price:** ₹{p.get('price', 0):,}")
+                        with e_c3:
+                            if st.button("🗑️ Delete Rug", key=f"del_prod_{p.get('id')}"):
+                                if supabase:
+                                    try:
+                                        supabase.table("products").delete().eq("id", p.get("id")).execute()
+                                        st.success(f"Deleted product #{p.get('id')}")
+                                        if "products" in st.session_state:
+                                            del st.session_state.products
+                                        st.rerun()
+                                    except Exception as e:
+                                        st.error(f"Failed to delete: {e}")
+
+        # TAB 4: SALES ANALYTICS & KPIS
+        with tab_analytics:
+            st.markdown("### 📊 Business Performance & Metrics")
+            if supabase:
+                try:
+                    all_orders = supabase.table("orders").select("*").execute().data or []
+                except Exception:
+                    all_orders = []
+            else:
+                all_orders = [{"total_amount": 8500, "payment_status": "Dispatched"}]
+
+            total_rev = sum(o.get("total_amount", 0) for o in all_orders)
+            total_orders_count = len(all_orders)
+            pending_count = sum(1 for o in all_orders if "Pending" in o.get("payment_status", "Pending"))
+            avg_val = int(total_rev / total_orders_count) if total_orders_count > 0 else 0
+
+            m1, m2, m3, m4 = st.columns(4)
+            m1.metric("Total Revenue", f"₹{total_rev:,}")
+            m2.metric("Total Orders", f"{total_orders_count}")
+            m3.metric("Pending Verification", f"{pending_count}")
+            m4.metric("Avg Order Value", f"₹{avg_val:,}")
+
+# ==============================================================================
+# 8. PREMIUM TRUST FOOTER
+# ==============================================================================
 trusted_light_footer = """
 <style>
 .trust-footer {
     background-color: #ffffff;
     color: #475569;
-    padding: 60px 40px 20px 40px;
-    margin-top: 80px;
-    border-top: 4px solid #2874f0;
-    box-shadow: 0 -4px 20px rgba(0,0,0,0.04);
+    padding: 50px 35px 20px 35px;
+    margin-top: 70px;
+    border-top: 3px solid #2563eb;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
     width: 100%;
 }
 .tf-container {
@@ -584,50 +948,50 @@ trusted_light_footer = """
 .tf-col { flex: 1; min-width: 220px; }
 .tf-col h4 {
     color: #0f172a;
-    margin-bottom: 20px;
-    font-size: 18px;
+    margin-bottom: 16px;
+    font-size: 17px;
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
-.tf-col p { font-size: 14px; line-height: 1.8; color: #475569; }
+.tf-col p { font-size: 13.5px; line-height: 1.7; color: #475569; }
 .tf-col a {
     color: #64748b;
     text-decoration: none;
-    font-size: 15px;
-    line-height: 2.2;
+    font-size: 14px;
+    line-height: 2.1;
     display: flex;
     align-items: center;
-    transition: color 0.3s ease;
+    transition: color 0.2s ease;
 }
 .tf-col a::before {
-    content: '▸'; margin-right: 8px; color: #2874f0; font-size: 18px;
+    content: '▸'; margin-right: 8px; color: #2563eb; font-size: 16px;
 }
-.tf-col a:hover { color: #2874f0; font-weight: 600; }
+.tf-col a:hover { color: #2563eb; font-weight: 600; }
 .trust-badges {
-    margin-top: 20px;
+    margin-top: 15px;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 .badge {
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 700;
-    color: #16a34a;
+    color: #15803d;
     background: #f0fdf4;
-    padding: 8px 12px;
+    padding: 6px 10px;
     border-radius: 6px;
     border: 1px solid #bbf7d0;
 }
 .tf-bottom {
     text-align: left;
-    padding-top: 25px;
+    padding-top: 20px;
     border-top: 1px solid #e2e8f0;
-    margin-top: 40px;
-    font-size: 13px;
+    margin-top: 35px;
+    font-size: 12.5px;
     color: #64748b;
     display: flex;
     justify-content: space-between;
@@ -637,48 +1001,46 @@ trusted_light_footer = """
     margin-right: auto;
     align-items: center;
 }
-.tf-bottom b { color: #334155; }
+.tf-bottom b { color: #1e293b; }
 .secure-payments img {
-    height: 24px;
+    height: 22px;
     margin-left: 12px;
-    opacity: 0.7;
-    transition: opacity 0.3s;
+    opacity: 0.8;
 }
-.secure-payments img:hover { opacity: 1; }
 </style>
 <div class="trust-footer">
     <div class="tf-container">
         <div class="tf-col">
             <h4>SM Carpet City</h4>
-            <p>Premium Rugs & Carpets straight from the weavers of Bhadohi. Delivering quality and authenticity globally.</p>
+            <p>Direct from the master weavers of Bhadohi. Certified authentic, hand-knotted and hand-tufted heirloom rugs delivered with pride.</p>
             <div class="trust-badges">
-                <div class="badge">🔒 100% Secure Checkout</div>
-                <div class="badge">✅ Verified Premium Seller</div>
+                <div class="badge">🔒 100% Encrypted UPI Payments</div>
+                <div class="badge">✅ Verified Bhadohi Artisan Quality</div>
             </div>
         </div>
         <div class="tf-col">
-            <h4>Quick Links</h4>
-            <a href="#">Shop All Rugs</a>
-            <a href="#">Track Your Order</a>
-            <a href="#">Help & Support</a>
-            <a href="#">About Us</a>
+            <h4>Quick Navigation</h4>
+            <a href="#">All Rugs & Carpets</a>
+            <a href="#">Live Order Tracking</a>
+            <a href="#">Custom Size Orders</a>
+            <a href="#">Artisan Story</a>
         </div>
         <div class="tf-col">
-            <h4>Legal & Policies</h4>
-            <a href="#">Privacy Policy</a>
+            <h4>Policies & Care</h4>
+            <a href="#">Carpet Cleaning & Care</a>
             <a href="#">Terms & Conditions</a>
-            <a href="#">Return & Refund Policy</a>
-            <a href="#">Secure Payment Policy</a>
+            <a href="#">15-Day Return Policy</a>
+            <a href="#">Insured Shipping Policy</a>
         </div>
         <div class="tf-col">
-            <h4>Contact Us</h4>
-            <p>📍 Sector 11, Carpet City Nijampur,<br>Bhadohi, UP - 221314</p>
+            <h4>Contact & Workshop</h4>
+            <p>📍 Sector 11, Carpet City Nijampur,<br>Bhadohi, Uttar Pradesh - 221314</p>
             <p>📞 +91-8009076300</p>
             <p>✉️ support@smcarpetcity.com</p>
         </div>
     </div>
     <div class="tf-bottom">
-        <span>© 2026-2027 <b>SM Carpet City</b>. All Rights Reserved. | Protected & Secured.</span>
+        <span>© 2026-2027 <b>SM Carpet City</b>. All Rights Reserved.</span>
         <span class="secure-payments">
             <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/unified-payment-interface-upi-logo-png_seeklogo-333088.png" alt="UPI">
             <img src="https://fkesbvxhbudfbpjcqtez.supabase.co/storage/v1/object/public/image/images.png" alt="Visa">
