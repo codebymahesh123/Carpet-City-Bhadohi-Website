@@ -18,7 +18,7 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 2. GLOBAL STYLES & FONTS (WITH MATERIAL ICON FIX)
+# 2. GLOBAL STYLES & FONTS (FLIPKART / AMAZON THEME)
 # ==============================================================================
 st.markdown(
     """
@@ -40,7 +40,7 @@ st.markdown(
         font-family: 'Poppins', sans-serif !important;
     }
 
-    /* CRITICAL FIX: Preserve Streamlit Material Icons & prevent "arrow_right" text bug on expanders */
+    /* PRESERVE STREAMLIT MATERIAL ICONS & FIX EXPANDER ARROW BUG */
     [data-testid="stIconMaterial"],
     [data-testid="stExpanderToggleIcon"],
     [data-testid="stExpanderToggleIcon"] span,
@@ -71,7 +71,7 @@ st.markdown(
 
     /* App Background */
     [data-testid="stAppViewContainer"] {
-        background-color: #f8fafc;
+        background-color: #f1f3f6;
         color: #1e293b;
     }
     
@@ -82,19 +82,19 @@ st.markdown(
         font-weight: 600 !important;
     }
     [data-testid="stButton"] button[kind="primary"] {
-        background-color: #2563eb !important;
+        background-color: #fb641b !important; /* Flipkart Orange for Primary CTA */
         color: white !important;
         border: none !important;
     }
     [data-testid="stButton"] button[kind="primary"]:hover {
-        background-color: #1d4ed8 !important;
-        box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35) !important;
+        background-color: #e5530d !important;
+        box-shadow: 0 4px 14px rgba(251, 100, 27, 0.4) !important;
         transform: translateY(-2px);
     }
     
     /* Brand Header */
     .brand-title {
-        color: #1e3a8a;
+        color: #2874f0; /* Flipkart Royal Blue */
         font-weight: 800;
         font-size: 28px;
         margin-top: -10px;
@@ -104,56 +104,114 @@ st.markdown(
         text-decoration: none;
     }
 
-    /* Product Cards */
+    /* Product Cards (Flipkart/Amazon Style) */
     .product-card {
         background-color: #ffffff;
-        padding: 18px;
-        border-radius: 14px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.04);
-        margin-bottom: 22px;
+        padding: 16px;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        margin-bottom: 20px;
         text-align: center;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        border: 1px solid #e2e8f0;
+        border: 1px solid #e5e7eb;
         height: 100%;
         display: flex;
         flex-direction: column;
         justify-content: space-between;
     }
     .product-card:hover {
-        box-shadow: 0 12px 28px rgba(0,0,0,0.09);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.12);
         transform: translateY(-4px);
         border-color: #cbd5e1;
     }
     .product-title {
-        font-size: 16px;
-        font-weight: 700;
-        color: #0f172a;
-        margin-top: 12px;
+        font-size: 15px;
+        font-weight: 600;
+        color: #212121;
+        margin-top: 10px;
         margin-bottom: 4px;
         line-height: 1.3;
-    }
-    .product-desc {
-        font-size: 13px;
-        color: #64748b;
-        margin-bottom: 10px;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
-        min-height: 38px;
+        min-height: 40px;
     }
-    .price-text {
-        color: #2563eb;
+    .product-desc {
+        font-size: 12px;
+        color: #717478;
+        margin-bottom: 8px;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        min-height: 34px;
+    }
+    
+    /* FLIPKART & AMAZON PRICING ROW */
+    .price-row-fk {
+        display: flex;
+        align-items: baseline;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 6px;
+        margin-bottom: 2px;
+        flex-wrap: wrap;
+    }
+    .selling-price {
+        color: #212121;
         font-weight: 800;
         font-size: 20px;
-        margin-bottom: 12px;
     }
+    .mrp-price {
+        color: #878787;
+        text-decoration: line-through;
+        font-size: 13px;
+        font-weight: 500;
+    }
+    .discount-percent {
+        color: #388e3c; /* Flipkart Green */
+        font-weight: 700;
+        font-size: 14px;
+        letter-spacing: -0.2px;
+    }
+    
+    /* BADGES */
+    .discount-ribbon {
+        background: #388e3c;
+        color: #ffffff;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        letter-spacing: 0.3px;
+    }
+    .save-tag {
+        color: #2e7d32;
+        font-size: 11px;
+        font-weight: 600;
+        background: #e8f5e9;
+        border: 1px dashed #a5d6a7;
+        padding: 2px 8px;
+        border-radius: 4px;
+        display: inline-block;
+        margin-top: 4px;
+        margin-bottom: 8px;
+    }
+    .assured-badge {
+        font-size: 11px;
+        font-weight: 700;
+        color: #2874f0;
+        font-style: italic;
+    }
+    
     .rating-container {
         font-size: 13px;
-        margin-bottom: 6px;
+        margin-bottom: 4px;
     }
     .stars { color: #f59e0b; }
-    .reviews-count { color: #94a3b8; font-size: 12px; }
+    .reviews-count { color: #878787; font-size: 12px; }
     
     /* Order Status Badges */
     .status-badge {
@@ -230,8 +288,9 @@ if "products" not in st.session_state:
         st.session_state.products = [
             {
                 "id": 1,
-                "name": "Kashmir Royal Silk Persian Rug",
-                "price": 8500,
+                "name": "Kashmir Royal Silk Persian Rug (5x8 ft)",
+                "price": 4250,
+                "mrp": 8500,  # 50% Off
                 "description": "Authentic hand-knotted pure Mulberry silk rug with traditional floral medallion pattern.",
                 "image_path": "https://images.unsplash.com/photo-1600121848594-d8644e57abab?auto=format&fit=crop&w=600&q=80",
                 "category": "Silk Rugs"
@@ -239,7 +298,8 @@ if "products" not in st.session_state:
             {
                 "id": 2,
                 "name": "Bhadohi Hand-Tufted Wool Carpet",
-                "price": 4200,
+                "price": 3780,
+                "mrp": 4200,  # 10% Off
                 "description": "Thick, plush 100% New Zealand blend wool carpet. Soft underfoot and durable.",
                 "image_path": "https://images.unsplash.com/photo-1579656381226-5fc0f0100c3b?auto=format&fit=crop&w=600&q=80",
                 "category": "Wool Rugs"
@@ -247,7 +307,8 @@ if "products" not in st.session_state:
             {
                 "id": 3,
                 "name": "Boho Natural Jute & Cotton Dari",
-                "price": 1850,
+                "price": 925,
+                "mrp": 1850,  # 50% Off
                 "description": "Eco-friendly natural woven jute runner with geometric fringe accents for living room.",
                 "image_path": "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=600&q=80",
                 "category": "Jute & Dari"
@@ -255,17 +316,38 @@ if "products" not in st.session_state:
         ]
 
 # ==============================================================================
-# 5. HELPER FUNCTIONS
+# 5. HELPER FUNCTIONS & FLIPKART/AMAZON PRICING ENGINE
 # ==============================================================================
+def get_pricing_details(prod):
+    """Calculates Selling Price, MRP, Discount % (10% to 50%), and Savings like Flipkart & Amazon."""
+    price = int(prod.get("price", 0))
+    if prod.get("mrp") and int(prod["mrp"]) > price:
+        mrp = int(prod["mrp"])
+        discount_pct = int(round(((mrp - price) / mrp) * 100))
+    else:
+        p_id = prod.get("id", 1)
+        discount_tiers = [50, 10, 40, 50, 20, 10, 50, 30, 15, 50]
+        idx = (int(p_id) if str(p_id).isdigit() else 1) % len(discount_tiers)
+        discount_pct = discount_tiers[idx]
+        mrp = int(round(price / (1 - (discount_pct / 100))))
+        if mrp > 100:
+            mrp = (mrp // 100) * 100 + 99
+
+    savings = max(0, mrp - price)
+    return price, mrp, discount_pct, savings
+
 def add_to_cart(prod):
     prod_id = str(prod["id"])
+    price, mrp, discount_pct, savings = get_pricing_details(prod)
     if prod_id in st.session_state.cart:
         st.session_state.cart[prod_id]["quantity"] += 1
     else:
         st.session_state.cart[prod_id] = {
             "id": prod["id"],
             "name": prod["name"],
-            "price": prod["price"],
+            "price": price,
+            "mrp": mrp,
+            "discount_pct": discount_pct,
             "image_path": prod.get("image_path", ""),
             "quantity": 1,
         }
@@ -275,6 +357,8 @@ def render_product_card(prod, key_prefix=""):
     rating = round(random.uniform(4.2, 5.0), 1)
     reviews = random.randint(35, 480)
     stars_html = f"<span class='stars'>{'★' * int(rating)}{'☆' * (5 - int(rating))}</span>"
+    
+    price, mrp, discount_pct, savings = get_pricing_details(prod)
 
     st.markdown("<div class='product-card'>", unsafe_allow_html=True)
     if not prod.get("image_path"):
@@ -285,25 +369,30 @@ def render_product_card(prod, key_prefix=""):
         except Exception:
             st.error("Image loading failed")
             
-    st.markdown(
-        f"""
-        <div>
-            <div class='product-title'>{prod['name']}</div>
-            <div class='rating-container'>{stars_html} <span class='reviews-count'>{rating} ({reviews} reviews)</span></div>
-            <div class='product-desc'>{prod.get('description', 'Handcrafted masterpiece straight from the artisans.')}</div>
-            <div class='price-text'>₹{prod['price']:,}</div>
-        </div>
-    """,
-        unsafe_allow_html=True,
+    card_html = (
+        f"<div style='display:flex; justify-content:space-between; align-items:center; margin-top:4px;'>"
+        f"<span class='discount-ribbon'>⚡ {discount_pct}% OFF</span>"
+        f"<span class='assured-badge'>✓ Assured</span>"
+        f"</div>"
+        f"<div class='product-title'>{prod['name']}</div>"
+        f"<div class='rating-container'>{stars_html} <span class='reviews-count'>{rating} ({reviews} ratings)</span></div>"
+        f"<div class='product-desc'>{prod.get('description', 'Handcrafted masterpiece straight from the artisans.')}</div>"
+        f"<div class='price-row-fk'>"
+        f"<span class='selling-price'>₹{price:,}</span>"
+        f"<span class='mrp-price'>₹{mrp:,}</span>"
+        f"<span class='discount-percent'>{discount_pct}% off</span>"
+        f"</div>"
+        f"<div class='save-tag'>You Save: ₹{savings:,}</div>"
     )
+    st.markdown(card_html, unsafe_allow_html=True)
     
     btn_col1, btn_col2 = st.columns(2)
     with btn_col1:
-        if st.button("Cart 🛒", key=f"add_{key_prefix}_{prod['id']}", use_container_width=True):
+        if st.button("Add to Cart 🛒", key=f"add_{key_prefix}_{prod['id']}", use_container_width=True):
             add_to_cart(prod)
             st.toast(f"🛒 Added '{prod['name'][:20]}...' to cart!")
     with btn_col2:
-        if st.button("Buy ⚡", key=f"buy_{key_prefix}_{prod['id']}", use_container_width=True, type="primary"):
+        if st.button("Buy Now ⚡", key=f"buy_{key_prefix}_{prod['id']}", use_container_width=True, type="primary"):
             add_to_cart(prod)
             st.session_state.page = "🛒 Shopping Cart & Checkout"
             st.rerun()
@@ -401,20 +490,33 @@ st.markdown(
 )
 
 # ==============================================================================
-# PAGE 1: PRODUCT CATALOG
+# PAGE 1: PRODUCT CATALOG (FLIPKART / AMAZON STYLE OFFERS)
 # ==============================================================================
 if st.session_state.page == "🛍️ Product Catalog":
     if not st.session_state.products:
         st.info("No carpets currently available. Please check back shortly or contact us on WhatsApp!")
     else:
+        # Grand Sale Banner (Flipkart Big Billion / Amazon Great Indian Festival Style)
+        st.markdown("""
+            <div style='background: linear-gradient(90deg, #2874f0 0%, #174ea6 100%); color: white; padding: 14px 20px; border-radius: 10px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap;'>
+                <div>
+                    <b style='font-size: 18px;'>🎉 MEGA CARPET FESTIVAL SALE</b><br>
+                    <span style='font-size: 13px; opacity: 0.9;'>Up to <b>50% OFF</b> + Extra 10% OFF with Coupon <b>CARPET10</b></span>
+                </div>
+                <div style='background: #fb641b; color: white; font-weight: 800; padding: 6px 14px; border-radius: 6px; font-size: 13px; margin-top: 5px;'>
+                    LIMITED TIME DEALS ⚡
+                </div>
+            </div>
+        """, unsafe_allow_html=True)
+
         # Featured Collections Carousel
-        st.markdown("### 🌟 Handpicked Artisan Highlights")
+        st.markdown("### 🌟 Deal of the Day (Handpicked Highlights)")
         featured = st.session_state.products[:6]
         
         if len(featured) > 0:
             c_prev, c_cards, c_next = st.columns([0.6, 10, 0.6])
             with c_prev:
-                st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 140px;'></div>", unsafe_allow_html=True)
                 if st.button("◀", key="prev_btn", use_container_width=True):
                     st.session_state.carousel_idx = (st.session_state.carousel_idx - 1) % len(featured)
                     st.rerun()
@@ -426,7 +528,7 @@ if st.session_state.page == "🛍️ Product Catalog":
                     with f_cols[i]:
                         render_product_card(featured[prod_idx], key_prefix=f"feat_{prod_idx}")
             with c_next:
-                st.markdown("<div style='height: 120px;'></div>", unsafe_allow_html=True)
+                st.markdown("<div style='height: 140px;'></div>", unsafe_allow_html=True)
                 if st.button("▶", key="next_btn", use_container_width=True):
                     st.session_state.carousel_idx = (st.session_state.carousel_idx + 1) % len(featured)
                     st.rerun()
@@ -434,14 +536,14 @@ if st.session_state.page == "🛍️ Product Catalog":
         st.markdown("<hr style='margin: 30px 0; border: 0; border-top: 1px solid #e2e8f0;'>", unsafe_allow_html=True)
 
         # Search, Category Filter, and Price Slider
-        st.markdown("### 🏷️ Explore All Rugs & Dari Collections")
+        st.markdown("### 🏷️ All Rugs, Carpets & Hand-Woven Dari")
         f_col1, f_col2, f_col3 = st.columns([2.5, 1.5, 1.5])
         
         with f_col1:
             search_query = st.text_input("🔍 Search by rug name, style, or material...", placeholder="e.g. Persian, Silk, Wool, Kashmiri, Floral")
             
         with f_col2:
-            sort_by = st.selectbox("Sort Order", ["Featured", "Price: Low to High", "Price: High to Low"])
+            sort_by = st.selectbox("Sort Order", ["Featured", "Price: Low to High", "Price: High to Low", "Biggest Discount (% Off)"])
 
         with f_col3:
             prices = [p["price"] for p in st.session_state.products if "price" in p and isinstance(p["price"], (int, float))]
@@ -459,11 +561,13 @@ if st.session_state.page == "🛍️ Product Catalog":
             filtered_prods = sorted(filtered_prods, key=lambda x: x.get('price', 0))
         elif sort_by == "Price: High to Low":
             filtered_prods = sorted(filtered_prods, key=lambda x: x.get('price', 0), reverse=True)
+        elif sort_by == "Biggest Discount (% Off)":
+            filtered_prods = sorted(filtered_prods, key=lambda x: get_pricing_details(x)[2], reverse=True)
 
         if not filtered_prods:
             st.warning("No carpets match your filter criteria. Try expanding your budget or search query.")
         else:
-            st.caption(f"Showing **{len(filtered_prods)}** handpicked carpets")
+            st.caption(f"Showing **{len(filtered_prods)}** handcrafted items with special discount pricing")
             cols = st.columns(3)
             for idx, prod in enumerate(filtered_prods):
                 with cols[idx % 3]:
@@ -502,7 +606,7 @@ elif st.session_state.page == "📦 Track Order":
                     "phone": track_input,
                     "address": "B-42 Sector 5, Carpet City",
                     "pincode": "221314",
-                    "total_amount": 8500,
+                    "total_amount": 4250,
                     "payment_status": "Dispatched",
                     "created_at": "2026-08-16T11:20:00"
                 }
@@ -528,7 +632,7 @@ elif st.session_state.page == "📦 Track Order":
                                 📞 <b>Phone:</b> {ord_data.get('phone')}
                             </div>
                             <div style='text-align: right;'>
-                                💰 <b>Total Bill:</b> <span style='color:#2563eb; font-weight:800; font-size:16px;'>₹{ord_data.get('total_amount', 0):,}</span>
+                                💰 <b>Total Bill:</b> <span style='color:#2874f0; font-weight:800; font-size:16px;'>₹{ord_data.get('total_amount', 0):,}</span>
                             </div>
                         </div>
                     </div>
@@ -537,7 +641,7 @@ elif st.session_state.page == "📦 Track Order":
             st.warning("No orders found matching your input. Please check the mobile number or contact support.")
 
 # ==============================================================================
-# PAGE 3: SHOPPING CART & CHECKOUT
+# PAGE 3: SHOPPING CART & CHECKOUT (FLIPKART / AMAZON BILL BREAKDOWN)
 # ==============================================================================
 elif st.session_state.page == "🛒 Shopping Cart & Checkout":
     if "order_ready" in st.session_state:
@@ -551,7 +655,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
         upi_url = f"upi://pay?pa={YOUR_UPI_ID}&pn={pn_name}&am={order_info['amount']}&cu=INR&tn={tn_note}"
         
         st.markdown("### 📱 Complete Your UPI Payment")
-        st.info(f"Payable Amount: **₹{order_info['amount']:,}** (Free Insured Delivery Included)")
+        st.info(f"Final Payable Amount: **₹{order_info['amount']:,}** (Free Insured Delivery Included)")
         
         col_qr, col_pay_actions = st.columns([1, 1.8], gap="large")
         with col_qr:
@@ -565,7 +669,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
             
         with col_pay_actions:
             st.markdown(
-                f'<a href="{upi_url}" target="_blank"><button style="background-color:#2563eb; color:white; padding:14px 20px; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:700; width:100%; margin-bottom:12px;">⚡ Open in UPI App (GPay / PhonePe / Paytm)</button></a>',
+                f'<a href="{upi_url}" target="_blank"><button style="background-color:#2874f0; color:white; padding:14px 20px; border:none; border-radius:8px; font-size:16px; cursor:pointer; font-weight:700; width:100%; margin-bottom:12px;">⚡ Open in UPI App (GPay / PhonePe / Paytm)</button></a>',
                 unsafe_allow_html=True,
             )
             
@@ -607,24 +711,27 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                 st.rerun()
 
     elif not st.session_state.cart:
-        st.info("🛒 Your cart is currently empty. Explore our catalog and add your favorite rugs!")
+        st.info("🛒 Your cart is currently empty. Explore our catalog and grab up to 50% OFF deals!")
         if st.button("Explore Catalog 🛍️", type="primary"):
             st.session_state.page = "🛍️ Product Catalog"
             st.rerun()
     else:
         col_cart, col_summary = st.columns([1.6, 1.2], gap="large")
-        subtotal = 0
+        total_mrp = 0
+        total_selling_price = 0
+        
         with col_cart:
-            st.markdown("### 🛒 Your Shopping Bag")
+            st.markdown("### 🛒 My Shopping Bag")
             for p_id, item in list(st.session_state.cart.items()):
-                c1, c2, c3, c4 = st.columns([3, 1.2, 1.2, 0.8])
-                c1.write(f"**{item['name']}**")
-                c2.write(f"₹{item['price']:,}")
+                c1, c2, c3, c4 = st.columns([3, 1.4, 1.2, 0.8])
+                c1.markdown(f"**{item['name']}**<br><span style='color:#388e3c; font-size:12px; font-weight:700;'>⚡ {item.get('discount_pct', 20)}% OFF</span>", unsafe_allow_html=True)
+                c2.markdown(f"<span style='font-size:15px; font-weight:700;'>₹{item['price']:,}</span> <span style='text-decoration:line-through; color:#878787; font-size:12px;'>₹{item.get('mrp', item['price']):,}</span>", unsafe_allow_html=True)
                 new_qty = c3.number_input(
                     "Qty", min_value=1, max_value=20, value=item["quantity"], key=f"qty_{p_id}", label_visibility="collapsed"
                 )
                 st.session_state.cart[p_id]["quantity"] = new_qty
-                subtotal += item["price"] * new_qty
+                total_selling_price += item["price"] * new_qty
+                total_mrp += item.get("mrp", item["price"]) * new_qty
                 if c4.button("🗑️", key=f"rem_{p_id}"):
                     del st.session_state.cart[p_id]
                     st.rerun()
@@ -632,38 +739,56 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
             st.markdown("---")
             
             # Coupon / Discount Code Feature
-            st.markdown("##### 🎟️ Have a Promo / Coupon Code?")
+            st.markdown("##### 🎟️ Apply Promo / Coupon Code")
             coup_col1, coup_col2 = st.columns([2, 1])
             with coup_col1:
                 coupon_input = st.text_input("Coupon Code", placeholder="e.g. CARPET10, BHADOHI500", label_visibility="collapsed")
             with coup_col2:
-                if st.button("Apply", use_container_width=True):
+                if st.button("Apply Code", use_container_width=True):
                     code = coupon_input.strip().upper()
                     if code == "CARPET10":
                         st.session_state.applied_coupon = {"code": "CARPET10", "type": "pct", "val": 10}
-                        st.success("10% Discount applied!")
+                        st.success("10% Extra Discount applied!")
                         st.rerun()
                     elif code == "BHADOHI500":
                         st.session_state.applied_coupon = {"code": "BHADOHI500", "type": "flat", "val": 500}
-                        st.success("₹500 Discount applied!")
+                        st.success("₹500 Extra Discount applied!")
                         st.rerun()
                     else:
                         st.error("Invalid Promo Code")
 
-            discount_amt = 0
+            coupon_discount = 0
             if st.session_state.applied_coupon:
                 coup = st.session_state.applied_coupon
                 if coup["type"] == "pct":
-                    discount_amt = int(subtotal * (coup["val"] / 100))
+                    coupon_discount = int(total_selling_price * (coup["val"] / 100))
                 else:
-                    discount_amt = min(subtotal, coup["val"])
-                st.info(f"✨ Promo `{coup['code']}` applied: -₹{discount_amt:,} saving!")
+                    coupon_discount = min(total_selling_price, coup["val"])
+                st.info(f"✨ Coupon `{coup['code']}` applied: -₹{coupon_discount:,} savings!")
 
-            final_total = max(0, subtotal - discount_amt)
-            st.markdown(f"#### Total Payable: <span style='color:#2563eb;'>₹{final_total:,}</span>", unsafe_allow_html=True)
+            final_total = max(0, total_selling_price - coupon_discount)
+            product_discount_savings = max(0, total_mrp - total_selling_price)
+            total_savings = product_discount_savings + coupon_discount
+
+            # Flipkart/Amazon Style Price Details Card
+            coupon_html = f"<div style='display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; color:#388e3c;'><span>Coupon Discount</span><span>- ₹{coupon_discount:,}</span></div>" if coupon_discount > 0 else ""
+            price_details_html = (
+                f"<div style='background:#ffffff; border:1px solid #e5e7eb; border-radius:10px; padding:18px; margin-top:15px;'>"
+                f"<b style='color:#878787; font-size:13px; text-transform:uppercase; letter-spacing:0.5px;'>Price Details</b>"
+                f"<hr style='margin:8px 0 12px 0; border:0; border-top:1px solid #f1f5f9;'>"
+                f"<div style='display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;'><span>Total MRP</span><span><del style='color:#878787;'>₹{total_mrp:,}</del></span></div>"
+                f"<div style='display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px; color:#388e3c;'><span>Product Discount</span><span>- ₹{product_discount_savings:,}</span></div>"
+                f"{coupon_html}"
+                f"<div style='display:flex; justify-content:space-between; margin-bottom:8px; font-size:14px;'><span>Delivery Charges</span><span style='color:#388e3c;'><b>FREE</b> <del style='color:#878787; font-size:12px;'>₹199</del></span></div>"
+                f"<hr style='margin:10px 0; border:0; border-top:1px dashed #cbd5e1;'>"
+                f"<div style='display:flex; justify-content:space-between; font-size:18px; font-weight:800; color:#212121;'><span>Total Amount</span><span style='color:#2874f0;'>₹{final_total:,}</span></div>"
+                f"<div style='margin-top:12px; background:#f0fdf4; border:1px solid #bbf7d0; color:#15803d; padding:8px 12px; border-radius:6px; font-size:13px; font-weight:700; text-align:center;'>🎉 You will save ₹{total_savings:,} on this order!</div>"
+                f"</div>"
+            )
+            st.markdown(price_details_html, unsafe_allow_html=True)
             
         with col_summary:
-            st.markdown("### 🚚 Delivery & Contact Details")
+            st.markdown("### 🚚 Delivery Details")
             with st.form("checkout_form"):
                 customer_name = st.text_input("Full Name *", placeholder="e.g. Ramesh Maurya")
                 phone = st.text_input("Mobile Number *", placeholder="10-digit mobile number")
@@ -847,15 +972,17 @@ elif st.session_state.page == "⚙️ Admin Panel":
                                     st.success(f"Order #{ord.get('id')} updated to '{new_stat}'")
                                     st.rerun()
 
-        # TAB 2: ADD NEW PRODUCT (WITH DIRECT STORAGE UPLOADER)
+        # TAB 2: ADD NEW PRODUCT (WITH ORIGINAL MRP & DISCOUNT CALCULATOR)
         with tab_add:
             st.markdown("### ✨ Add New Rug to Catalog")
             with st.form("add_product_form", clear_on_submit=True):
-                p_col1, p_col2 = st.columns(2)
+                p_col1, p_col2, p_col3 = st.columns([2, 1, 1])
                 with p_col1:
                     new_name = st.text_input("Carpet / Rug Title *", placeholder="e.g. Persian Medallion Hand-Knotted Silk Rug")
                 with p_col2:
-                    new_price = st.number_input("Price in INR (₹) *", min_value=100, step=500, value=2500)
+                    new_price = st.number_input("Selling Price (₹) *", min_value=100, step=100, value=2500, help="The final discounted price customers pay")
+                with p_col3:
+                    new_mrp = st.number_input("Original MRP (₹)", min_value=0, step=100, value=5000, help="Original price for strikethrough (e.g. ₹5,000 for 50% OFF)")
                 
                 img_col1, img_col2 = st.columns(2)
                 with img_col1:
@@ -906,7 +1033,8 @@ elif st.session_state.page == "⚙️ Admin Panel":
             st.markdown("### 🏷️ Manage Catalog Items")
             if "products" in st.session_state and st.session_state.products:
                 for p in st.session_state.products:
-                    with st.expander(f"#{p.get('id')} {p.get('name')} (₹{p.get('price', 0):,})"):
+                    price, mrp, discount_pct, _ = get_pricing_details(p)
+                    with st.expander(f"#{p.get('id')} {p.get('name')} — ₹{price:,} (MRP: ₹{mrp:,} | {discount_pct}% OFF)"):
                         e_c1, e_c2, e_c3 = st.columns([1.5, 3, 1])
                         with e_c1:
                             if p.get("image_path"):
@@ -914,7 +1042,7 @@ elif st.session_state.page == "⚙️ Admin Panel":
                         with e_c2:
                             st.write(f"**Name:** {p.get('name')}")
                             st.write(f"**Description:** {p.get('description')}")
-                            st.write(f"**Current Price:** ₹{p.get('price', 0):,}")
+                            st.write(f"**Price:** ₹{price:,} | **MRP:** ₹{mrp:,} | **Discount:** {discount_pct}% OFF")
                         with e_c3:
                             if st.button("🗑️ Delete Rug", key=f"del_prod_{p.get('id')}"):
                                 if supabase:
@@ -959,7 +1087,7 @@ trusted_light_footer = """
     color: #475569;
     padding: 50px 35px 20px 35px;
     margin-top: 70px;
-    border-top: 3px solid #2563eb;
+    border-top: 3px solid #2874f0;
     box-shadow: 0 -4px 20px rgba(0,0,0,0.03);
     width: 100%;
 }
@@ -991,9 +1119,9 @@ trusted_light_footer = """
     transition: color 0.2s ease;
 }
 .tf-col a::before {
-    content: '▸'; margin-right: 8px; color: #2563eb; font-size: 16px;
+    content: '▸'; margin-right: 8px; color: #2874f0; font-size: 16px;
 }
-.tf-col a:hover { color: #2563eb; font-weight: 600; }
+.tf-col a:hover { color: #2874f0; font-weight: 600; }
 .trust-badges {
     margin-top: 15px;
     display: flex;
