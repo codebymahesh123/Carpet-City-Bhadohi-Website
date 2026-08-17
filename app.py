@@ -18,16 +18,46 @@ st.set_page_config(
 )
 
 # ==============================================================================
-# 2. GLOBAL STYLES & FONTS
+# 2. GLOBAL STYLES & FONTS (WITH MATERIAL ICON FIX)
 # ==============================================================================
 st.markdown(
     """
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
-    /* Global Typography */
-    html, body, [class*="st-"], .stMarkdown, p, h1, h2, h3, h4, h5, h6, input, button {
+    /* Global Typography - Safely applied without breaking icon ligatures */
+    html, body, .stMarkdown, p, h1, h2, h3, h4, h5, h6, label {
         font-family: 'Poppins', sans-serif !important;
+    }
+
+    /* Form controls & Button text */
+    input, textarea, select, 
+    [data-testid="stButton"] button p,
+    [data-testid="stButton"] button div,
+    [data-testid="stTab"] button p,
+    [data-testid="stExpander"] summary span p,
+    [data-testid="stExpander"] summary span div {
+        font-family: 'Poppins', sans-serif !important;
+    }
+
+    /* CRITICAL FIX: Preserve Streamlit Material Icons & prevent "arrow_right" text bug on expanders */
+    [data-testid="stIconMaterial"],
+    [data-testid="stExpanderToggleIcon"],
+    [data-testid="stExpanderToggleIcon"] span,
+    [data-testid="stExpanderToggleIcon"] svg,
+    .material-symbols-rounded,
+    .material-symbols-outlined,
+    .material-icons,
+    span[data-testid="stIconMaterial"],
+    [data-testid="stIconMaterial"] * {
+        font-family: 'Material Symbols Rounded', 'Material Symbols Outlined', 'Material Icons' !important;
+        font-feature-settings: 'liga' 1 !important;
+        -webkit-font-feature-settings: 'liga' 1 !important;
+        text-transform: none !important;
+        letter-spacing: normal !important;
+        word-wrap: normal !important;
+        white-space: nowrap !important;
+        direction: ltr !important;
     }
 
     /* Clean UI Overrides */
@@ -440,7 +470,7 @@ if st.session_state.page == "🛍️ Product Catalog":
                     render_product_card(prod, key_prefix="catalog")
 
 # ==============================================================================
-# PAGE 2: ORDER TRACKING (NEW FEATURE)
+# PAGE 2: ORDER TRACKING
 # ==============================================================================
 elif st.session_state.page == "📦 Track Order":
     st.markdown("## 📦 Track Your Order Status")
@@ -686,7 +716,7 @@ elif st.session_state.page == "🛒 Shopping Cart & Checkout":
                             st.error(f"Order placement error: {e}")
 
 # ==============================================================================
-# PAGE 4: ADMIN DASHBOARD (IMPROVED WITH 4 POWERFUL TABS)
+# PAGE 4: ADMIN DASHBOARD
 # ==============================================================================
 elif st.session_state.page == "⚙️ Admin Panel":
     if not st.session_state.admin_logged_in:
@@ -748,7 +778,6 @@ elif st.session_state.page == "⚙️ Admin Panel":
                         except Exception as e:
                             st.error(f"Auth database connection failed: {e}")
                     else:
-                        # Fallback Demo Auth
                         if admin_user == "admin" and admin_pass == "admin123":
                             st.session_state.admin_logged_in = True
                             st.rerun()
@@ -800,7 +829,6 @@ elif st.session_state.page == "⚙️ Admin Panel":
                             st.write(f"💳 **Amount:** ₹{ord.get('total_amount', 0):,}")
                             st.write(f"ℹ️ **Notes / UTR Info:** {ord.get('home_address', 'None')}")
                             
-                            # Contact Customer on WhatsApp
                             c_phone = ord.get('phone', '')
                             wa_cust_link = f"https://wa.me/91{c_phone}?text=Hello%20{quote(str(ord.get('customer_name')))},%20update%20regarding%20your%20Carpet%20Order%20%23{ord.get('id')}:"
                             st.markdown(f"[💬 Message Customer on WhatsApp]({wa_cust_link})")
@@ -829,7 +857,6 @@ elif st.session_state.page == "⚙️ Admin Panel":
                 with p_col2:
                     new_price = st.number_input("Price in INR (₹) *", min_value=100, step=500, value=2500)
                 
-                # Image options: File upload or URL
                 img_col1, img_col2 = st.columns(2)
                 with img_col1:
                     uploaded_img = st.file_uploader("Upload Image directly (JPG/PNG)", type=["jpg", "jpeg", "png", "webp"])
@@ -844,7 +871,6 @@ elif st.session_state.page == "⚙️ Admin Panel":
                         st.warning("Please specify both product title and price.")
                     else:
                         final_img_path = new_img_url
-                        # If file uploaded, attempt to save to Supabase Storage
                         if uploaded_img is not None and supabase:
                             try:
                                 file_bytes = uploaded_img.read()
@@ -880,7 +906,7 @@ elif st.session_state.page == "⚙️ Admin Panel":
             st.markdown("### 🏷️ Manage Catalog Items")
             if "products" in st.session_state and st.session_state.products:
                 for p in st.session_state.products:
-                    with st.expander(f"ID #{p.get('id')} — {p.get('name')} (₹{p.get('price', 0):,})"):
+                    with st.expander(f"#{p.get('id')} {p.get('name')} (₹{p.get('price', 0):,})"):
                         e_c1, e_c2, e_c3 = st.columns([1.5, 3, 1])
                         with e_c1:
                             if p.get("image_path"):
